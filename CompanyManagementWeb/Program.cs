@@ -1,7 +1,14 @@
+using CompanyManagementWeb.DataAccess;
+using Microsoft.EntityFrameworkCore;
+
 var builder = WebApplication.CreateBuilder(args);
 
 // Add services to the container.
 builder.Services.AddControllersWithViews();
+builder.Services.AddDbContext<CompanyManagementDbContext>
+(
+    options => options.UseSqlServer(builder.Configuration.GetConnectionString("CompanyManagementConnection"))
+);
 
 var app = builder.Build();
 
