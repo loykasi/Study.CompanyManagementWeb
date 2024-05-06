@@ -1,4 +1,5 @@
-﻿using Microsoft.EntityFrameworkCore;
+﻿using CompanyManagementWeb.Models;
+using Microsoft.EntityFrameworkCore;
 
 namespace CompanyManagementWeb.DataAccess
 {
@@ -6,5 +7,9 @@ namespace CompanyManagementWeb.DataAccess
     {
         public CompanyManagementDbContext(DbContextOptions<CompanyManagementDbContext> options) : base(options)
         { }
+
+        public DbSet<Employee> Employees { get; set; }
+        public DbSet<Post> Posts { get; set; }
+        public DbSet<Schedule> Schedules { get; set; }
     }
 }

@@ -1,0 +1,88 @@
+﻿@using CompanyManagementWeb.DataAccess;
+@using Microsoft.EntityFrameworkCore;
+@using System.Data;
+
+@{
+    ViewData["Title"] = "Database";
+}
+
+@inject CompanyManagementDbContext dbContext
+@{
+    var connect = dbContext.Database.GetDbConnection();
+    var dbname = connect.Database;
+    var can_connect = dbContext.Database.CanConnect();
+
+    dbContext.Database.GetPendingMigrations();
+}
+
+@{
+    var message = TempData["StatusMessage"] as string;
+}
+@if (!string.IsNullOrEmpty(message))
+{
+    <div class="alert alert-warning alert-dismissible fade show" role="alert">
+        @message
+        <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+            <span aria-hidden="true">&times;</span>
+        </button>
+    </div>
+}
+
+<h2>Thông tin</h2>
+<p>- Database: @dbname</p>
+<p>- Source: @connect.DataSource</p>
+<p>- Database: @connect.State</p>
+
+<hr />
+@foreach (var migration in dbContext.Database.GetAppliedMigrations())
+{
+    <p>@migration</p>
+}
+
+@foreach (var migration in dbContext.Database.GetPendingMigrations())
+{
+    <p>@migration (pending)</p>
+}
+@if (dbContext.Database.GetPendingMigrations().Any())
+{   <form method="post">
+     <button class="btn btn-success" asp-action="Migrate">Tạo Database ( Cập nhật Migrations ) </button>
+</form>
+    
+}
+@if ( !can_connect)
+{
+    <p class ="alert alert-danger"> Không có khả năng kết nối đến database</p>
+}
+
+
+@if (can_connect)
+{
+    <h2>Các table</h2>
+    await dbContext.Database.OpenConnectionAsync();
+    var tables = dbContext.Database
+        .GetDbConnection()
+        .GetSchema("Tables")
+        .AsEnumerable()
+        .Select(row => row.Field<string>("TABLE_NAME"))
+        .ToList();
+
+    <div class="row">
+        @{
+            int count = 0;
+        }
+        @foreach (var table in tables)
+        {
+            if (count % 5 == 0)
+            {
+                @:</div><div class="row">
+            }
+            <div class="col-md-2 col-sm-3 col-xs-4">
+                @table
+            </div>
+            count++;
+        }
+    </div>
+
+    <a class="btn btn-danger" asp-action="Delete">Xóa Database: @dbname</a>
+    @*<a class="btn btn-danger" asp-action="SeedData">Seed Data</a>*@
+}
