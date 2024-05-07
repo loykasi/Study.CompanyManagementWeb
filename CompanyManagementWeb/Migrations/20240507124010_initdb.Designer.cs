@@ -12,8 +12,8 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace CompanyManagementWeb.Migrations
 {
     [DbContext(typeof(CompanyManagementDbContext))]
-    [Migration("20240506154026_DbInit")]
-    partial class DbInit
+    [Migration("20240507124010_initdb")]
+    partial class initdb
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -49,6 +49,9 @@ namespace CompanyManagementWeb.Migrations
 
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
 
+                    b.Property<int>("CategoryId")
+                        .HasColumnType("int");
+
                     b.Property<string>("Content")
                         .HasColumnType("nvarchar(max)");
 
@@ -58,6 +61,9 @@ namespace CompanyManagementWeb.Migrations
                     b.Property<int>("EmployeeId")
                         .HasColumnType("int");
 
+                    b.Property<int?>("PostCategoryId")
+                        .HasColumnType("int");
+
                     b.Property<string>("Title")
                         .HasColumnType("nvarchar(max)");
 
@@ -65,7 +71,25 @@ namespace CompanyManagementWeb.Migrations
 
                     b.HasIndex("EmployeeId");
 
+                    b.HasIndex("PostCategoryId");
+
                     b.ToTable("Posts");
+                });
+
+            modelBuilder.Entity("CompanyManagementWeb.Models.PostCategory", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<string>("Name")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.HasKey("Id");
+
+                    b.ToTable("PostCategory");
                 });
 
             modelBuilder.Entity("CompanyManagementWeb.Models.Schedule", b =>
@@ -106,7 +130,13 @@ namespace CompanyManagementWeb.Migrations
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
+                    b.HasOne("CompanyManagementWeb.Models.PostCategory", "PostCategory")
+                        .WithMany()
+                        .HasForeignKey("PostCategoryId");
+
                     b.Navigation("Employee");
+
+                    b.Navigation("PostCategory");
                 });
 
             modelBuilder.Entity("CompanyManagementWeb.Models.Schedule", b =>

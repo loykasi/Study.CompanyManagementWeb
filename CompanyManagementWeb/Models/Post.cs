@@ -7,6 +7,9 @@
         public string? Content { get; set; }
         public DateTime? CreatedDate { get; set; }
 
+        public int CategoryId { get; set; }
+        public PostCategory? PostCategory { get; set; }
+
         public int EmployeeId { get; set; }
         public Employee? Employee { get; set; }
     }

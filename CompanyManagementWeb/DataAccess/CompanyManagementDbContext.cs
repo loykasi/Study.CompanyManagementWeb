@@ -11,5 +11,6 @@ namespace CompanyManagementWeb.DataAccess
         public DbSet<Employee> Employees { get; set; }
         public DbSet<Post> Posts { get; set; }
         public DbSet<Schedule> Schedules { get; set; }
+        public DbSet<CompanyManagementWeb.Models.PostCategory> PostCategory { get; set; } = default!;
     }
 }

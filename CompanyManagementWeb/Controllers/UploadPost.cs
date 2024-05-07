@@ -2,7 +2,9 @@
 using CompanyManagementWeb.Models;
 using CompanyManagementWeb.ViewModels;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.IdentityModel.Tokens;
 
 namespace CompanyManagementWeb.Controllers
 {
@@ -17,6 +19,7 @@ namespace CompanyManagementWeb.Controllers
 
         public IActionResult Index()
         {
+            ViewData["Category"] = new SelectList(_context.PostCategory, "Id", "Name");
             return View();
         }
 
@@ -47,8 +50,28 @@ namespace CompanyManagementWeb.Controllers
 
         public async Task<IActionResult> ViewPost()
         {
-            var companyManagementDbContext = _context.Posts.Include(p => p.Employee);
-            return View(await companyManagementDbContext.ToListAsync());
+            PostSearchViewModel postSearchViewModel = new PostSearchViewModel();
+            postSearchViewModel.Posts = await _context.Posts.Include(p => p.Employee).ToListAsync();
+            return View(postSearchViewModel);
+        }
+
+        public async Task<IActionResult> Search(PostSearchViewModel postSearchViewModel)
+        {
+            IQueryable<Post> post = _context.Posts.Include(p => p.Employee);
+            if (!postSearchViewModel.SearchValue.IsNullOrEmpty())
+            {
+                post = post.Where(p => p.Title.Contains(postSearchViewModel.SearchValue));
+            }
+            if (postSearchViewModel.FromDate != null)
+            {
+                post = post.Where(p => p.CreatedDate >= postSearchViewModel.FromDate);
+            }
+            if (postSearchViewModel.ToDate != null)
+            {
+                post = post.Where(p => p.CreatedDate <= postSearchViewModel.ToDate);
+            }
+            postSearchViewModel.Posts = await post.ToListAsync();
+            return View("ViewPost", postSearchViewModel);
         }
     }
 }
