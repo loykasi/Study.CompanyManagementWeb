@@ -1,7 +1,9 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿using CompanyManagementWeb.DataAccess;
+using CompanyManagementWeb.Models;
+using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 
-namespace CompanyManagementWeb.DataAccess
+namespace CompanyManagementWeb.Controllers
 {
     public class DatabaseManageController : Controller
     {
@@ -40,6 +42,16 @@ namespace CompanyManagementWeb.DataAccess
             await _dbContext.Database.MigrateAsync();
             StatusMessage = "Cập nhật Database thành công";
             return RedirectToAction(nameof(Index));
+        }
+
+        [HttpGet]
+        public async Task<IActionResult> SeedDataAsync()
+        {
+            _dbContext.Employees.Add(new Employee { Name = "Lam An"});
+            await _dbContext.SaveChangesAsync();
+
+            StatusMessage = "Vừa seed Database";
+            return RedirectToAction("Index");
         }
     }
 }

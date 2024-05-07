@@ -1,0 +1,17 @@
+@model IEnumerable<CompanyManagementWeb.Models.Post>
+
+@{
+    ViewData["Title"] = "Create new post";
+}
+
+<h1>Thông báo</h1>
+
+@foreach (var item in Model)
+{
+    <div>
+        <div>@item.Title</div>
+        <div>@item.Content</div>
+        <div>@item.CreatedDate</div>
+        <div>@item.Employee.Name</div>
+    </div>
+}
