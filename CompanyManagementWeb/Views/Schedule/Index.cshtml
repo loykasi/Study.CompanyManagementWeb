@@ -1,0 +1,19 @@
+﻿@model IEnumerable<CompanyManagementWeb.Models.Schedule>
+
+@{
+    ViewData["Title"] = "Index";
+}
+
+<h1>Index</h1>
+
+@foreach (var item in Model)
+{
+    <div class="border">
+        <div>@item.Title</div>
+        <div>@item.Description</div>
+        <div>@item.StartDate</div>
+        <div>@item.EndDate</div>
+        <div>@item.Employee.Name</div>
+    </div>
+}
+

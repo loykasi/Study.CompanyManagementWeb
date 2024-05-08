@@ -50,8 +50,10 @@ namespace CompanyManagementWeb.Controllers
 
         public async Task<IActionResult> ViewPost()
         {
-            PostSearchViewModel postSearchViewModel = new PostSearchViewModel();
-            postSearchViewModel.Posts = await _context.Posts.Include(p => p.Employee).ToListAsync();
+            PostSearchViewModel postSearchViewModel = new PostSearchViewModel
+            {
+                Posts = await _context.Posts.Include(p => p.Employee).ToListAsync()
+            };
             return View(postSearchViewModel);
         }
 
