@@ -23,7 +23,7 @@ namespace CompanyManagementWeb.Controllers
         // GET: Schedule
         public async Task<IActionResult> Index()
         {
-            var schedules = _context.Schedules.Include(s => s.Employee).ThenInclude(s => s.Department);
+            var schedules = _context.Schedules.Include(s => s.Employee).Include(s => s.Department);
             return View(await schedules.ToListAsync());
         }
 

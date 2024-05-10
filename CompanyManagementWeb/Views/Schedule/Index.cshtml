@@ -14,8 +14,11 @@
         <div>@item.StartDate</div>
         <div>@item.EndDate</div>
         <div>@item.Employee.Name</div>
-        <div>@item.DepartmentId</div>
-        <a asp-action="Edit" asp-route-id="@item.Id">Edit</a> |
+        @if (item.DepartmentId.HasValue)
+        {
+            <div>@item.Department.Name</div>
+        }
+        <a asp-action="Edit" asp-route-id="@item.Id">Edit</a>
     </div>
 }
 
