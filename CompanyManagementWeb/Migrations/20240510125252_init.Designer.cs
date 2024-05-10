@@ -12,7 +12,7 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace CompanyManagementWeb.Migrations
 {
     [DbContext(typeof(CompanyManagementDbContext))]
-    [Migration("20240510074956_init")]
+    [Migration("20240510125252_init")]
     partial class init
     {
         /// <inheritdoc />
@@ -79,6 +79,9 @@ namespace CompanyManagementWeb.Migrations
                     b.Property<DateTime?>("CreatedDate")
                         .HasColumnType("datetime2");
 
+                    b.Property<int?>("DepartmentId")
+                        .HasColumnType("int");
+
                     b.Property<int>("EmployeeId")
                         .HasColumnType("int");
 
@@ -89,6 +92,8 @@ namespace CompanyManagementWeb.Migrations
                         .HasColumnType("nvarchar(max)");
 
                     b.HasKey("Id");
+
+                    b.HasIndex("DepartmentId");
 
                     b.HasIndex("EmployeeId");
 
@@ -121,6 +126,9 @@ namespace CompanyManagementWeb.Migrations
 
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
 
+                    b.Property<int?>("DepartmentId")
+                        .HasColumnType("int");
+
                     b.Property<string>("Description")
                         .HasColumnType("nvarchar(max)");
 
@@ -137,6 +145,8 @@ namespace CompanyManagementWeb.Migrations
                         .HasColumnType("nvarchar(max)");
 
                     b.HasKey("Id");
+
+                    b.HasIndex("DepartmentId");
 
                     b.HasIndex("EmployeeId");
 
@@ -156,6 +166,10 @@ namespace CompanyManagementWeb.Migrations
 
             modelBuilder.Entity("CompanyManagementWeb.Models.Post", b =>
                 {
+                    b.HasOne("CompanyManagementWeb.Models.Department", "Department")
+                        .WithMany()
+                        .HasForeignKey("DepartmentId");
+
                     b.HasOne("CompanyManagementWeb.Models.Employee", "Employee")
                         .WithMany()
                         .HasForeignKey("EmployeeId")
@@ -166,6 +180,8 @@ namespace CompanyManagementWeb.Migrations
                         .WithMany()
                         .HasForeignKey("PostCategoryId");
 
+                    b.Navigation("Department");
+
                     b.Navigation("Employee");
 
                     b.Navigation("PostCategory");
@@ -173,11 +189,17 @@ namespace CompanyManagementWeb.Migrations
 
             modelBuilder.Entity("CompanyManagementWeb.Models.Schedule", b =>
                 {
+                    b.HasOne("CompanyManagementWeb.Models.Department", "Department")
+                        .WithMany()
+                        .HasForeignKey("DepartmentId");
+
                     b.HasOne("CompanyManagementWeb.Models.Employee", "Employee")
                         .WithMany()
                         .HasForeignKey("EmployeeId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
+
+                    b.Navigation("Department");
 
                     b.Navigation("Employee");
                 });

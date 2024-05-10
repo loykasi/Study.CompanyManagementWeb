@@ -68,11 +68,17 @@ namespace CompanyManagementWeb.Migrations
                     CreatedDate = table.Column<DateTime>(type: "datetime2", nullable: true),
                     CategoryId = table.Column<int>(type: "int", nullable: false),
                     PostCategoryId = table.Column<int>(type: "int", nullable: true),
+                    DepartmentId = table.Column<int>(type: "int", nullable: true),
                     EmployeeId = table.Column<int>(type: "int", nullable: false)
                 },
                 constraints: table =>
                 {
                     table.PrimaryKey("PK_Posts", x => x.Id);
+                    table.ForeignKey(
+                        name: "FK_Posts_Departments_DepartmentId",
+                        column: x => x.DepartmentId,
+                        principalTable: "Departments",
+                        principalColumn: "Id");
                     table.ForeignKey(
                         name: "FK_Posts_Employees_EmployeeId",
                         column: x => x.EmployeeId,
@@ -96,11 +102,17 @@ namespace CompanyManagementWeb.Migrations
                     Description = table.Column<string>(type: "nvarchar(max)", nullable: true),
                     StartDate = table.Column<DateTime>(type: "datetime2", nullable: true),
                     EndDate = table.Column<DateTime>(type: "datetime2", nullable: true),
+                    DepartmentId = table.Column<int>(type: "int", nullable: true),
                     EmployeeId = table.Column<int>(type: "int", nullable: false)
                 },
                 constraints: table =>
                 {
                     table.PrimaryKey("PK_Schedules", x => x.Id);
+                    table.ForeignKey(
+                        name: "FK_Schedules_Departments_DepartmentId",
+                        column: x => x.DepartmentId,
+                        principalTable: "Departments",
+                        principalColumn: "Id");
                     table.ForeignKey(
                         name: "FK_Schedules_Employees_EmployeeId",
                         column: x => x.EmployeeId,
@@ -115,6 +127,11 @@ namespace CompanyManagementWeb.Migrations
                 column: "DepartmentId");
 
             migrationBuilder.CreateIndex(
+                name: "IX_Posts_DepartmentId",
+                table: "Posts",
+                column: "DepartmentId");
+
+            migrationBuilder.CreateIndex(
                 name: "IX_Posts_EmployeeId",
                 table: "Posts",
                 column: "EmployeeId");
@@ -123,6 +140,11 @@ namespace CompanyManagementWeb.Migrations
                 name: "IX_Posts_PostCategoryId",
                 table: "Posts",
                 column: "PostCategoryId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_Schedules_DepartmentId",
+                table: "Schedules",
+                column: "DepartmentId");
 
             migrationBuilder.CreateIndex(
                 name: "IX_Schedules_EmployeeId",

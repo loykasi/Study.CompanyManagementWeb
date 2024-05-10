@@ -23,8 +23,8 @@ namespace CompanyManagementWeb.Controllers
         // GET: Schedule
         public async Task<IActionResult> Index()
         {
-            var companyManagementDbContext = _context.Schedules.Include(s => s.Employee);
-            return View(await companyManagementDbContext.ToListAsync());
+            var schedules = _context.Schedules.Include(s => s.Employee).ThenInclude(s => s.Department);
+            return View(await schedules.ToListAsync());
         }
 
         // GET: Schedule/Details/5
@@ -49,7 +49,11 @@ namespace CompanyManagementWeb.Controllers
         // GET: Schedule/Create
         public IActionResult Create()
         {
-            return View();
+            ScheduleViewModel scheduleViewModel = new()
+            {
+                Departments = new SelectList(_context.Departments, "Id", "Name")
+            };
+            return View(scheduleViewModel);
         }
 
         // POST: Schedule/Create
@@ -74,7 +78,8 @@ namespace CompanyManagementWeb.Controllers
                                             scheduleViewModel.StartTime.Value.Hour, scheduleViewModel.StartTime.Value.Minute, scheduleViewModel.StartTime.Value.Second),
                     EndDate = new DateTime(scheduleViewModel.Date.Value.Year, scheduleViewModel.Date.Value.Month, scheduleViewModel.Date.Value.Day,
                                             scheduleViewModel.EndTime.Value.Hour, scheduleViewModel.EndTime.Value.Minute, scheduleViewModel.EndTime.Value.Second),
-                    EmployeeId = employeeId
+                    EmployeeId = employeeId,
+                    DepartmentId = scheduleViewModel.DepartmentId
                 };
 
                 _context.Add(schedule);
@@ -98,30 +103,49 @@ namespace CompanyManagementWeb.Controllers
             {
                 return NotFound();
             }
-            ViewData["EmployeeId"] = new SelectList(_context.Employees, "Id", "Id", schedule.EmployeeId);
-            return View(schedule);
+            
+            ScheduleViewModel scheduleViewModel = new()
+            {
+                Title = schedule.Title,
+                Description = schedule.Description,
+                Date = schedule.StartDate,
+                StartTime = schedule.StartDate,
+                EndTime = schedule.EndDate,
+                Departments = new SelectList(_context.Departments, "Id", "Name", schedule.DepartmentId)
+            };
+            return View(scheduleViewModel);
         }
 
         // POST: Schedule/Edit/5
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Edit(int id, [Bind("Id,Title,Description,StartDate,EndDate,EmployeeId")] Schedule schedule)
+        public async Task<IActionResult> Edit(ScheduleViewModel scheduleViewModel)
         {
-            if (id != schedule.Id)
-            {
-                return NotFound();
-            }
-
             if (ModelState.IsValid)
             {
                 try
                 {
+                    var schedule = await _context.Schedules.FindAsync(scheduleViewModel.Id);
+                    if (schedule == null)
+                    {
+                        return NotFound();
+                    }
+
+                    schedule.Title = scheduleViewModel.Title;
+                    schedule.Description = scheduleViewModel.Description;
+                    schedule.StartDate = new DateTime(scheduleViewModel.Date.Value.Year, scheduleViewModel.Date.Value.Month, scheduleViewModel.Date.Value.Day,
+                                            scheduleViewModel.StartTime.Value.Hour, scheduleViewModel.StartTime.Value.Minute, scheduleViewModel.StartTime.Value.Second);
+                    schedule.EndDate = new DateTime(scheduleViewModel.Date.Value.Year, scheduleViewModel.Date.Value.Month, scheduleViewModel.Date.Value.Day,
+                                            scheduleViewModel.EndTime.Value.Hour, scheduleViewModel.EndTime.Value.Minute, scheduleViewModel.EndTime.Value.Second);
+                    schedule.EmployeeId = 1;
+                    schedule.DepartmentId = scheduleViewModel.DepartmentId;
+                    
                     _context.Update(schedule);
                     await _context.SaveChangesAsync();
                 }
                 catch (DbUpdateConcurrencyException)
                 {
-                    if (!ScheduleExists(schedule.Id))
+                    if (!ScheduleExists(scheduleViewModel.Id.Value))
                     {
                         return NotFound();
                     }
@@ -132,8 +156,8 @@ namespace CompanyManagementWeb.Controllers
                 }
                 return RedirectToAction(nameof(Index));
             }
-            ViewData["EmployeeId"] = new SelectList(_context.Employees, "Id", "Id", schedule.EmployeeId);
-            return View(schedule);
+            
+            return View(scheduleViewModel);
         }
 
         // GET: Schedule/Delete/5

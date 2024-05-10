@@ -14,6 +14,8 @@
         <div>@item.StartDate</div>
         <div>@item.EndDate</div>
         <div>@item.Employee.Name</div>
+        <div>@item.DepartmentId</div>
+        <a asp-action="Edit" asp-route-id="@item.Id">Edit</a> |
     </div>
 }
 
