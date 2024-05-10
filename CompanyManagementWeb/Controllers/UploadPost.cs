@@ -19,7 +19,7 @@ namespace CompanyManagementWeb.Controllers
 
         public IActionResult Index()
         {
-            ViewData["Category"] = new SelectList(_context.PostCategory, "Id", "Name");
+            ViewData["Category"] = new SelectList(_context.PostCategories, "Id", "Name");
             return View();
         }
 

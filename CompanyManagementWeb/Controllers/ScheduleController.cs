@@ -57,6 +57,10 @@ namespace CompanyManagementWeb.Controllers
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Create(ScheduleViewModel scheduleViewModel)
         {
+            System.Diagnostics.Debug.WriteLine("LOG: " + scheduleViewModel.Date.Value);
+            System.Diagnostics.Debug.WriteLine("LOG: " + scheduleViewModel.StartTime.Value);
+            System.Diagnostics.Debug.WriteLine("LOG: " + scheduleViewModel.EndTime.Value);
+            
             if (ModelState.IsValid)
             {
                 // To do: get current user ID
@@ -66,8 +70,10 @@ namespace CompanyManagementWeb.Controllers
                 {
                     Title = scheduleViewModel.Title,
                     Description = scheduleViewModel.Description,
-                    StartDate = scheduleViewModel.StartDate,
-                    EndDate = scheduleViewModel.EndDate,
+                    StartDate = new DateTime(scheduleViewModel.Date.Value.Year, scheduleViewModel.Date.Value.Month, scheduleViewModel.Date.Value.Day,
+                                            scheduleViewModel.StartTime.Value.Hour, scheduleViewModel.StartTime.Value.Minute, scheduleViewModel.StartTime.Value.Second),
+                    EndDate = new DateTime(scheduleViewModel.Date.Value.Year, scheduleViewModel.Date.Value.Month, scheduleViewModel.Date.Value.Day,
+                                            scheduleViewModel.EndTime.Value.Hour, scheduleViewModel.EndTime.Value.Minute, scheduleViewModel.EndTime.Value.Second),
                     EmployeeId = employeeId
                 };
 
@@ -97,8 +103,6 @@ namespace CompanyManagementWeb.Controllers
         }
 
         // POST: Schedule/Edit/5
-        // To protect from overposting attacks, enable the specific properties you want to bind to.
-        // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Edit(int id, [Bind("Id,Title,Description,StartDate,EndDate,EmployeeId")] Schedule schedule)

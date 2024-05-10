@@ -47,7 +47,30 @@ namespace CompanyManagementWeb.Controllers
         [HttpGet]
         public async Task<IActionResult> SeedDataAsync()
         {
-            _dbContext.Employees.Add(new Employee { Name = "Lam An"});
+            List<Department> departments =
+            [
+                new Department { Name = "Product Development"},
+                new Department { Name = "Product Management"},
+                new Department { Name = "Sale and Marketing"},
+                new Department { Name = "Customer Support"},
+                new Department { Name = "Human Resources"},
+                new Department { Name = "IT Services"},
+                new Department { Name = "Quality Assurance"},
+            ];
+
+            _dbContext.Departments.Add(departments[0]);
+            _dbContext.Departments.Add(departments[1]);
+            _dbContext.Departments.Add(departments[2]);
+            _dbContext.Departments.Add(departments[3]);
+            _dbContext.Departments.Add(departments[4]);
+            _dbContext.Departments.Add(departments[5]);
+            _dbContext.Departments.Add(departments[6]);
+            await _dbContext.SaveChangesAsync();
+
+            _dbContext.Employees.Add(new Employee { Name = "Lam An", DepartmentId = departments[0].Id });
+            _dbContext.Employees.Add(new Employee { Name = "Khanh Duy", DepartmentId = departments[1].Id });
+            _dbContext.Employees.Add(new Employee { Name = "Ngoc Tin", DepartmentId = departments[2].Id });
+            _dbContext.Employees.Add(new Employee { Name = "Thu Thuy", DepartmentId = departments[3].Id });
             await _dbContext.SaveChangesAsync();
 
             StatusMessage = "Vừa seed Database";

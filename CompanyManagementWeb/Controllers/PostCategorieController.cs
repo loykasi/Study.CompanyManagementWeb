@@ -22,7 +22,7 @@ namespace CompanyManagementWeb.Controllers
         // GET: PostCategorie
         public async Task<IActionResult> Index()
         {
-            return View(await _context.PostCategory.ToListAsync());
+            return View(await _context.PostCategories.ToListAsync());
         }
 
         // GET: PostCategorie/Details/5
@@ -33,7 +33,7 @@ namespace CompanyManagementWeb.Controllers
                 return NotFound();
             }
 
-            var postCategory = await _context.PostCategory
+            var postCategory = await _context.PostCategories
                 .FirstOrDefaultAsync(m => m.Id == id);
             if (postCategory == null)
             {
@@ -73,7 +73,7 @@ namespace CompanyManagementWeb.Controllers
                 return NotFound();
             }
 
-            var postCategory = await _context.PostCategory.FindAsync(id);
+            var postCategory = await _context.PostCategories.FindAsync(id);
             if (postCategory == null)
             {
                 return NotFound();
@@ -124,7 +124,7 @@ namespace CompanyManagementWeb.Controllers
                 return NotFound();
             }
 
-            var postCategory = await _context.PostCategory
+            var postCategory = await _context.PostCategories
                 .FirstOrDefaultAsync(m => m.Id == id);
             if (postCategory == null)
             {
@@ -139,10 +139,10 @@ namespace CompanyManagementWeb.Controllers
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> DeleteConfirmed(int id)
         {
-            var postCategory = await _context.PostCategory.FindAsync(id);
+            var postCategory = await _context.PostCategories.FindAsync(id);
             if (postCategory != null)
             {
-                _context.PostCategory.Remove(postCategory);
+                _context.PostCategories.Remove(postCategory);
             }
 
             await _context.SaveChangesAsync();
@@ -151,7 +151,7 @@ namespace CompanyManagementWeb.Controllers
 
         private bool PostCategoryExists(int id)
         {
-            return _context.PostCategory.Any(e => e.Id == id);
+            return _context.PostCategories.Any(e => e.Id == id);
         }
     }
 }
