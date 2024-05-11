@@ -3,7 +3,7 @@ using Microsoft.AspNetCore.Mvc.Rendering;
 
 namespace CompanyManagementWeb.ViewModels
 {
-    public class ScheduleViewModel
+    public class ScheduleEditViewModel
     {
         public int? Id { get; set; }
         public string? Title { get; set; }
@@ -11,8 +11,10 @@ namespace CompanyManagementWeb.ViewModels
         public DateTime? Date { get; set; }
         public DateTime? StartTime { get; set; }
         public DateTime? EndTime { get; set; }
-        public string? DepartmentName { get; set; }
-        public string? EmployeeName { get; set; }
+        public int? DepartmentId { get; set; }
+
+        // public List<Department> Departments { get; set; }
+        public SelectList? Departments { get; set; }
 
         public string FormattedDate
         {
@@ -41,6 +43,19 @@ namespace CompanyManagementWeb.ViewModels
                 if (!EndTime.HasValue)
                     return "";
                 return EndTime.Value.ToString("hh:mm tt");
+            }
+        }
+
+        public string SelectedDepartment
+        {
+            get
+            {
+                if (Departments == null)
+                    return "";
+                var department = Departments.FirstOrDefault(d => d.Selected);
+                if (department == null)
+                    return "";
+                return department.Text;
             }
         }
     }

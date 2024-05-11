@@ -1,24 +1,45 @@
-﻿@model IEnumerable<CompanyManagementWeb.Models.Schedule>
+﻿@model CompanyManagementWeb.ViewModels.ScheduleIndexViewModel
 
 @{
     ViewData["Title"] = "Index";
 }
 
 <h1>Index</h1>
+<p>
+    <a asp-action="Create">Create New</a>
+</p>
 
-@foreach (var item in Model)
-{
-    <div class="border">
-        <div>@item.Title</div>
-        <div>@item.Description</div>
-        <div>@item.StartDate</div>
-        <div>@item.EndDate</div>
-        <div>@item.Employee.Name</div>
-        @if (item.DepartmentId.HasValue)
+<form asp-action="Search">
+    <select asp-for="DepartmentId" class ="form-control">
+        <option value="">All</option>
+        @foreach (var item in Model.Departments)
         {
-            <div>@item.Department.Name</div>
+            <option value="@item.Value">@item.Text</option>
         }
-        <a asp-action="Edit" asp-route-id="@item.Id">Edit</a>
+    </select>
+    <input type="submit" value="Search" class="btn btn-danger" />
+</form>
+
+@foreach (var group in Model.Schedules.GroupBy(s => s.FormattedDate).OrderBy(s => s.Key))
+{
+    <div class="border mt-5">
+    <p>@group.Key</p>
+    @foreach (var item in group)
+    {
+        <div class="border">
+            <div>@item.Title</div>
+            <div>@item.Description</div>
+            <div>@item.FormattedDate</div>
+            <div>@item.FormattedStartTime</div>
+            <div>@item.FormattedEndTime</div>
+            @if (!item.DepartmentName.Equals(""))
+            {
+                <div>@item.DepartmentName</div>
+            }
+            <div>@item.EmployeeName</div>
+            <a asp-action="Edit" asp-route-id="@item.Id">Edit</a>
+        </div>
+    }
     </div>
 }
 

@@ -23,33 +23,76 @@ namespace CompanyManagementWeb.Controllers
         // GET: Schedule
         public async Task<IActionResult> Index()
         {
+            ScheduleIndexViewModel scheduleIndexViewModel = new()
+            { 
+                Schedules = new List<ScheduleViewModel>()
+            };
+
             var schedules = _context.Schedules.Include(s => s.Employee).Include(s => s.Department);
-            return View(await schedules.ToListAsync());
+            foreach (var item in schedules)
+            {
+                scheduleIndexViewModel.Schedules.Add(new ScheduleViewModel
+                    {
+                        Id = item.Id,
+                        Title = item.Title,
+                        Description = item.Description,
+                        Date = item.StartDate,
+                        StartTime = item.StartDate,
+                        EndTime = item.EndDate,
+                        DepartmentName = item.Department?.Name ?? "",
+                        EmployeeName = item.Employee?.Name ?? "",
+                    });
+            }
+
+            scheduleIndexViewModel.Departments = _context.Departments.Select(d => new SelectListItem
+                                                                            {
+                                                                                Value = d.Id.ToString(),
+                                                                                Text = d.Name
+                                                                            });
+
+            return View(scheduleIndexViewModel);
         }
 
-        // GET: Schedule/Details/5
-        public async Task<IActionResult> Details(int? id)
+        public IActionResult Search(ScheduleIndexViewModel scheduleIndexViewModel)
         {
-            if (id == null)
+            System.Diagnostics.Debug.WriteLine("LOG (Search): " + scheduleIndexViewModel.DepartmentId);
+            
+            IQueryable<Schedule> schedules = _context.Schedules;
+
+            if (scheduleIndexViewModel.DepartmentId != null)
             {
-                return NotFound();
+                schedules = schedules.Where(s => s.DepartmentId == scheduleIndexViewModel.DepartmentId);
+            }
+            schedules = schedules.Include(s => s.Employee).Include(s => s.Department);
+
+            scheduleIndexViewModel.Schedules = new List<ScheduleViewModel>();
+            foreach (var item in schedules)
+            {
+                scheduleIndexViewModel.Schedules.Add(new ScheduleViewModel
+                    {
+                        Id = item.Id,
+                        Title = item.Title,
+                        Description = item.Description,
+                        Date = item.StartDate,
+                        StartTime = item.StartDate,
+                        EndTime = item.EndDate,
+                        DepartmentName = item.Department?.Name ?? "",
+                        EmployeeName = item.Employee?.Name ?? "",
+                    });
             }
 
-            var schedule = await _context.Schedules
-                .Include(s => s.Employee)
-                .FirstOrDefaultAsync(m => m.Id == id);
-            if (schedule == null)
-            {
-                return NotFound();
-            }
-
-            return View(schedule);
+            scheduleIndexViewModel.Departments = _context.Departments.Select(d => new SelectListItem
+                                                                            {
+                                                                                Value = d.Id.ToString(),
+                                                                                Text = d.Name
+                                                                            });
+            return View("Index", scheduleIndexViewModel);
         }
 
         // GET: Schedule/Create
         public IActionResult Create()
         {
-            ScheduleViewModel scheduleViewModel = new()
+            ScheduleEditViewModel scheduleViewModel = new()
             {
                 Departments = new SelectList(_context.Departments, "Id", "Name")
             };
@@ -59,11 +102,11 @@ namespace CompanyManagementWeb.Controllers
         // POST: Schedule/Create
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Create(ScheduleViewModel scheduleViewModel)
+        public async Task<IActionResult> Create(ScheduleEditViewModel scheduleViewModel)
         {
-            System.Diagnostics.Debug.WriteLine("LOG: " + scheduleViewModel.Date.Value);
-            System.Diagnostics.Debug.WriteLine("LOG: " + scheduleViewModel.StartTime.Value);
-            System.Diagnostics.Debug.WriteLine("LOG: " + scheduleViewModel.EndTime.Value);
+            // System.Diagnostics.Debug.WriteLine("LOG: " + scheduleViewModel.Date.Value);
+            // System.Diagnostics.Debug.WriteLine("LOG: " + scheduleViewModel.StartTime.Value);
+            // System.Diagnostics.Debug.WriteLine("LOG: " + scheduleViewModel.EndTime.Value);
             
             if (ModelState.IsValid)
             {
@@ -104,7 +147,7 @@ namespace CompanyManagementWeb.Controllers
                 return NotFound();
             }
             
-            ScheduleViewModel scheduleViewModel = new()
+            ScheduleEditViewModel scheduleViewModel = new()
             {
                 Id = schedule.Id,
                 Title = schedule.Title,
@@ -120,7 +163,7 @@ namespace CompanyManagementWeb.Controllers
         // POST: Schedule/Edit/5
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Edit(ScheduleViewModel scheduleViewModel)
+        public async Task<IActionResult> Edit(ScheduleEditViewModel scheduleViewModel)
         {
             if (ModelState.IsValid)
             {
@@ -175,7 +218,7 @@ namespace CompanyManagementWeb.Controllers
                 return NotFound();
             }
             
-            ScheduleViewModel scheduleViewModel = new()
+            ScheduleEditViewModel scheduleViewModel = new()
             {
                 Id = schedule.Id,
                 Title = schedule.Title,
@@ -192,7 +235,7 @@ namespace CompanyManagementWeb.Controllers
         // POST: Schedule/Delete/5
         [HttpPost, ActionName("Delete")]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> DeleteConfirmed(ScheduleViewModel scheduleViewModel)
+        public async Task<IActionResult> DeleteConfirmed(ScheduleEditViewModel scheduleViewModel)
         {
             var schedule = await _context.Schedules.FindAsync(scheduleViewModel.Id);
             if (schedule != null)
