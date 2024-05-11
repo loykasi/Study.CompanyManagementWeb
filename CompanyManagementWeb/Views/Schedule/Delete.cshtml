@@ -1,4 +1,4 @@
-﻿@model CompanyManagementWeb.Models.Schedule
+﻿@model CompanyManagementWeb.ViewModels.ScheduleViewModel
 
 @{
     ViewData["Title"] = "Delete";
@@ -24,22 +24,28 @@
             @Html.DisplayFor(model => model.Description)
         </dd>
         <dt class = "col-sm-2">
-            @Html.DisplayNameFor(model => model.StartDate)
+            @Html.DisplayNameFor(model => model.Date)
         </dt>
         <dd class = "col-sm-10">
-            @Html.DisplayFor(model => model.StartDate)
+            @Html.DisplayFor(model => model.FormattedDate)
         </dd>
         <dt class = "col-sm-2">
-            @Html.DisplayNameFor(model => model.EndDate)
+            @Html.DisplayNameFor(model => model.StartTime)
         </dt>
         <dd class = "col-sm-10">
-            @Html.DisplayFor(model => model.EndDate)
+            @Html.DisplayFor(model => model.FormattedStartTime)
         </dd>
         <dt class = "col-sm-2">
-            @Html.DisplayNameFor(model => model.Employee)
+            @Html.DisplayNameFor(model => model.EndTime)
         </dt>
         <dd class = "col-sm-10">
-            @Html.DisplayFor(model => model.Employee.Id)
+            @Html.DisplayFor(model => model.FormattedEndTime)
+        </dd>
+        <dt class = "col-sm-2">
+            @Html.DisplayNameFor(model => model.Departments)
+        </dt>
+        <dd class = "col-sm-10">
+            @Html.DisplayFor(model => model.SelectedDepartment)
         </dd>
     </dl>
     

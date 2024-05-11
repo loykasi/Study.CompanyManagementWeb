@@ -106,6 +106,7 @@ namespace CompanyManagementWeb.Controllers
             
             ScheduleViewModel scheduleViewModel = new()
             {
+                Id = schedule.Id,
                 Title = schedule.Title,
                 Description = schedule.Description,
                 Date = schedule.StartDate,
@@ -168,23 +169,32 @@ namespace CompanyManagementWeb.Controllers
                 return NotFound();
             }
 
-            var schedule = await _context.Schedules
-                .Include(s => s.Employee)
-                .FirstOrDefaultAsync(m => m.Id == id);
+            var schedule = await _context.Schedules.FindAsync(id);
             if (schedule == null)
             {
                 return NotFound();
             }
+            
+            ScheduleViewModel scheduleViewModel = new()
+            {
+                Id = schedule.Id,
+                Title = schedule.Title,
+                Description = schedule.Description,
+                Date = schedule.StartDate,
+                StartTime = schedule.StartDate,
+                EndTime = schedule.EndDate,
+                Departments = new SelectList(_context.Departments, "Id", "Name", schedule.DepartmentId)
+            };
 
-            return View(schedule);
+            return View(scheduleViewModel);
         }
 
         // POST: Schedule/Delete/5
         [HttpPost, ActionName("Delete")]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> DeleteConfirmed(int id)
+        public async Task<IActionResult> DeleteConfirmed(ScheduleViewModel scheduleViewModel)
         {
-            var schedule = await _context.Schedules.FindAsync(id);
+            var schedule = await _context.Schedules.FindAsync(scheduleViewModel.Id);
             if (schedule != null)
             {
                 _context.Schedules.Remove(schedule);
