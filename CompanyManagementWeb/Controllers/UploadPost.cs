@@ -19,7 +19,7 @@ namespace CompanyManagementWeb.Controllers
 
         public IActionResult Index()
         {
-            ViewData["Category"] = new SelectList(_context.PostCategory, "Id", "Name");
+            ViewData["Category"] = new SelectList(_context.PostCategories, "Id", "Name");
             return View();
         }
 
@@ -50,8 +50,10 @@ namespace CompanyManagementWeb.Controllers
 
         public async Task<IActionResult> ViewPost()
         {
-            PostSearchViewModel postSearchViewModel = new PostSearchViewModel();
-            postSearchViewModel.Posts = await _context.Posts.Include(p => p.Employee).ToListAsync();
+            PostSearchViewModel postSearchViewModel = new PostSearchViewModel
+            {
+                Posts = await _context.Posts.Include(p => p.Employee).ToListAsync()
+            };
             return View(postSearchViewModel);
         }
 

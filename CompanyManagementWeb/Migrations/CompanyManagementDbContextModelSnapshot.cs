@@ -22,7 +22,7 @@ namespace CompanyManagementWeb.Migrations
 
             SqlServerModelBuilderExtensions.UseIdentityColumns(modelBuilder);
 
-            modelBuilder.Entity("CompanyManagementWeb.Models.Employee", b =>
+            modelBuilder.Entity("CompanyManagementWeb.Models.Department", b =>
                 {
                     b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
@@ -34,6 +34,27 @@ namespace CompanyManagementWeb.Migrations
                         .HasColumnType("nvarchar(max)");
 
                     b.HasKey("Id");
+
+                    b.ToTable("Departments");
+                });
+
+            modelBuilder.Entity("CompanyManagementWeb.Models.Employee", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<int>("DepartmentId")
+                        .HasColumnType("int");
+
+                    b.Property<string>("Name")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("DepartmentId");
 
                     b.ToTable("Employees");
                 });
@@ -55,6 +76,9 @@ namespace CompanyManagementWeb.Migrations
                     b.Property<DateTime?>("CreatedDate")
                         .HasColumnType("datetime2");
 
+                    b.Property<int?>("DepartmentId")
+                        .HasColumnType("int");
+
                     b.Property<int>("EmployeeId")
                         .HasColumnType("int");
 
@@ -65,6 +89,8 @@ namespace CompanyManagementWeb.Migrations
                         .HasColumnType("nvarchar(max)");
 
                     b.HasKey("Id");
+
+                    b.HasIndex("DepartmentId");
 
                     b.HasIndex("EmployeeId");
 
@@ -86,7 +112,7 @@ namespace CompanyManagementWeb.Migrations
 
                     b.HasKey("Id");
 
-                    b.ToTable("PostCategory");
+                    b.ToTable("PostCategories");
                 });
 
             modelBuilder.Entity("CompanyManagementWeb.Models.Schedule", b =>
@@ -96,6 +122,9 @@ namespace CompanyManagementWeb.Migrations
                         .HasColumnType("int");
 
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<int?>("DepartmentId")
+                        .HasColumnType("int");
 
                     b.Property<string>("Description")
                         .HasColumnType("nvarchar(max)");
@@ -114,13 +143,30 @@ namespace CompanyManagementWeb.Migrations
 
                     b.HasKey("Id");
 
+                    b.HasIndex("DepartmentId");
+
                     b.HasIndex("EmployeeId");
 
                     b.ToTable("Schedules");
                 });
 
+            modelBuilder.Entity("CompanyManagementWeb.Models.Employee", b =>
+                {
+                    b.HasOne("CompanyManagementWeb.Models.Department", "Department")
+                        .WithMany()
+                        .HasForeignKey("DepartmentId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Department");
+                });
+
             modelBuilder.Entity("CompanyManagementWeb.Models.Post", b =>
                 {
+                    b.HasOne("CompanyManagementWeb.Models.Department", "Department")
+                        .WithMany()
+                        .HasForeignKey("DepartmentId");
+
                     b.HasOne("CompanyManagementWeb.Models.Employee", "Employee")
                         .WithMany()
                         .HasForeignKey("EmployeeId")
@@ -131,6 +177,8 @@ namespace CompanyManagementWeb.Migrations
                         .WithMany()
                         .HasForeignKey("PostCategoryId");
 
+                    b.Navigation("Department");
+
                     b.Navigation("Employee");
 
                     b.Navigation("PostCategory");
@@ -138,11 +186,17 @@ namespace CompanyManagementWeb.Migrations
 
             modelBuilder.Entity("CompanyManagementWeb.Models.Schedule", b =>
                 {
+                    b.HasOne("CompanyManagementWeb.Models.Department", "Department")
+                        .WithMany()
+                        .HasForeignKey("DepartmentId");
+
                     b.HasOne("CompanyManagementWeb.Models.Employee", "Employee")
                         .WithMany()
                         .HasForeignKey("EmployeeId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
+
+                    b.Navigation("Department");
 
                     b.Navigation("Employee");
                 });
