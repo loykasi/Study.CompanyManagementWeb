@@ -1,53 +1,55 @@
-﻿@model IEnumerable<CompanyManagementWeb.Models.Post>
+﻿@model CompanyManagementWeb.ViewModels.PostIndexViewModel
 
 @{
     ViewData["Title"] = "Index";
 }
 
-<h1>Index</h1>
-
+<h1>Thông báo</h1>
 <p>
     <a asp-action="Create">Create New</a>
 </p>
-<table class="table">
-    <thead>
-        <tr>
-            <th>
-                @Html.DisplayNameFor(model => model.Title)
-            </th>
-            <th>
-                @Html.DisplayNameFor(model => model.Content)
-            </th>
-            <th>
-                @Html.DisplayNameFor(model => model.CreatedDate)
-            </th>
-            <th>
-                @Html.DisplayNameFor(model => model.Employee)
-            </th>
-            <th></th>
-        </tr>
-    </thead>
-    <tbody>
-@foreach (var item in Model) {
-        <tr>
-            <td>
-                @Html.DisplayFor(modelItem => item.Title)
-            </td>
-            <td>
-                @Html.DisplayFor(modelItem => item.Content)
-            </td>
-            <td>
-                @Html.DisplayFor(modelItem => item.CreatedDate)
-            </td>
-            <td>
-                @Html.DisplayFor(modelItem => item.Employee.Id)
-            </td>
-            <td>
-                <a asp-action="Edit" asp-route-id="@item.Id">Edit</a> |
-                <a asp-action="Details" asp-route-id="@item.Id">Details</a> |
-                <a asp-action="Delete" asp-route-id="@item.Id">Delete</a>
-            </td>
-        </tr>
+
+<div class="row">
+    <div class="col-md-12">
+        <form asp-action="Search">
+            <div class="form-group">
+                <label asp-for="SearchValue" class="control-label">Search</label>
+                <input asp-for="SearchValue" class="form-control" />
+            </div>
+            <div class="form-group">
+                <label asp-for="FromDate" class="control-label">From date</label>
+                <input asp-for="FromDate" type="datetime-local" class="form-control" />
+            </div>
+            <div class="form-group">
+                <label asp-for="ToDate" class="control-label">To date</label>
+                <input asp-for="ToDate" type="datetime-local" class="form-control" />
+            </div>
+            <div class="form-group">
+                <label asp-for="DepartmentId" class="control-label">Department</label>
+                <select asp-for="DepartmentId" class ="form-control">
+                    <option value="">All</option>
+                    @foreach (var item in Model.Departments)
+                    {
+                        <option value="@item.Value">@item.Text</option>
+                    }
+                </select>
+            </div>
+            <div class="form-group">
+                <input type="submit" value="Search" class="btn btn-primary" />
+            </div>
+        </form>
+    </div>
+</div>
+
+@foreach (var item in Model.Posts)
+{
+    <div class="border mt-5">
+        <div>@item.Title</div>
+        <div>@item.Content</div>
+        <div>@item.CreatedDate</div>
+        <div>@item.CategoryName</div>
+        <div>@item.DepartmentName</div>
+        <div>@item.EmployeeName</div>
+        <a asp-action="Edit" asp-route-id="@item.Id">Edit</a>
+    </div>
 }
-    </tbody>
-</table>

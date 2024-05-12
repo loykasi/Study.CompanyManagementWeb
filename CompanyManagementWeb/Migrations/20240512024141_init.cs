@@ -66,8 +66,7 @@ namespace CompanyManagementWeb.Migrations
                     Title = table.Column<string>(type: "nvarchar(max)", nullable: true),
                     Content = table.Column<string>(type: "nvarchar(max)", nullable: true),
                     CreatedDate = table.Column<DateTime>(type: "datetime2", nullable: true),
-                    CategoryId = table.Column<int>(type: "int", nullable: false),
-                    PostCategoryId = table.Column<int>(type: "int", nullable: true),
+                    PostCategoryId = table.Column<int>(type: "int", nullable: false),
                     DepartmentId = table.Column<int>(type: "int", nullable: true),
                     EmployeeId = table.Column<int>(type: "int", nullable: false)
                 },
@@ -89,7 +88,8 @@ namespace CompanyManagementWeb.Migrations
                         name: "FK_Posts_PostCategories_PostCategoryId",
                         column: x => x.PostCategoryId,
                         principalTable: "PostCategories",
-                        principalColumn: "Id");
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Cascade);
                 });
 
             migrationBuilder.CreateTable(

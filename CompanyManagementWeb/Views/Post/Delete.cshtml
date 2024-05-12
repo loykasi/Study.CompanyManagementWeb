@@ -1,4 +1,4 @@
-﻿@model CompanyManagementWeb.Models.Post
+﻿@model CompanyManagementWeb.ViewModels.PostViewModel
 
 @{
     ViewData["Title"] = "Delete";
@@ -30,10 +30,16 @@
             @Html.DisplayFor(model => model.CreatedDate)
         </dd>
         <dt class = "col-sm-2">
-            @Html.DisplayNameFor(model => model.Employee)
+            @Html.DisplayNameFor(model => model.CategoryName)
         </dt>
         <dd class = "col-sm-10">
-            @Html.DisplayFor(model => model.Employee.Id)
+            @Html.DisplayFor(model => model.CategoryName)
+        </dd>
+        <dt class = "col-sm-2">
+            @Html.DisplayNameFor(model => model.DepartmentName)
+        </dt>
+        <dd class = "col-sm-10">
+            @Html.DisplayFor(model => model.DepartmentName)
         </dd>
     </dl>
     

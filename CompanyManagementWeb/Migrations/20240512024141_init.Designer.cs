@@ -12,7 +12,7 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace CompanyManagementWeb.Migrations
 {
     [DbContext(typeof(CompanyManagementDbContext))]
-    [Migration("20240510125252_init")]
+    [Migration("20240512024141_init")]
     partial class init
     {
         /// <inheritdoc />
@@ -70,9 +70,6 @@ namespace CompanyManagementWeb.Migrations
 
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
 
-                    b.Property<int>("CategoryId")
-                        .HasColumnType("int");
-
                     b.Property<string>("Content")
                         .HasColumnType("nvarchar(max)");
 
@@ -85,7 +82,7 @@ namespace CompanyManagementWeb.Migrations
                     b.Property<int>("EmployeeId")
                         .HasColumnType("int");
 
-                    b.Property<int?>("PostCategoryId")
+                    b.Property<int>("PostCategoryId")
                         .HasColumnType("int");
 
                     b.Property<string>("Title")
@@ -178,7 +175,9 @@ namespace CompanyManagementWeb.Migrations
 
                     b.HasOne("CompanyManagementWeb.Models.PostCategory", "PostCategory")
                         .WithMany()
-                        .HasForeignKey("PostCategoryId");
+                        .HasForeignKey("PostCategoryId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
 
                     b.Navigation("Department");
 
