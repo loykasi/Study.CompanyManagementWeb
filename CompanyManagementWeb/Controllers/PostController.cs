@@ -57,6 +57,10 @@ namespace CompanyManagementWeb.Controllers
             {
                 posts = posts.Where(p => p.Title.Contains(postIndexViewModel.SearchValue));
             }
+            if (postIndexViewModel.DepartmentId != null)
+            {
+                posts = posts.Where(p => p.DepartmentId == postIndexViewModel.DepartmentId);
+            }
             if (postIndexViewModel.FromDate != null)
             {
                 posts = posts.Where(p => p.CreatedDate >= postIndexViewModel.FromDate);
@@ -99,7 +103,11 @@ namespace CompanyManagementWeb.Controllers
                 return NotFound();
             }
 
-            var post = await _context.Posts.FindAsync(id);
+            var post = await _context.Posts
+                            .Include(p => p.PostCategory)
+                            .Include(p => p.Employee)
+                            .Include(p => p.Department)
+                            .FirstOrDefaultAsync(p => p.Id == id);
             if (post == null)
             {
                 return NotFound();
@@ -237,7 +245,11 @@ namespace CompanyManagementWeb.Controllers
                 return NotFound();
             }
 
-            var post = await _context.Posts.FindAsync(id);
+            var post = await _context.Posts
+                                        .Include(p => p.PostCategory)
+                                        .Include(p => p.Employee)
+                                        .Include(p => p.Department)
+                                        .FirstOrDefaultAsync(p => p.Id == id);
             if (post == null)
             {
                 return NotFound();
