@@ -45,11 +45,13 @@
 {
     <div class="border mt-5">
         <div>@item.Title</div>
-        <div>@Html.Raw(item.Content)</div>
+        <div>@item.Description</div>
+        @* <div>@Html.Raw(item.Content)</div> *@
         <div>@item.CreatedDate</div>
         <div>@item.CategoryName</div>
         <div>@item.DepartmentName</div>
         <div>@item.EmployeeName</div>
+        <a asp-action="Details" asp-route-id="@item.Id">Details</a>
         <a asp-action="Edit" asp-route-id="@item.Id">Edit</a>
     </div>
 }

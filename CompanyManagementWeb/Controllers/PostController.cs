@@ -32,6 +32,7 @@ namespace CompanyManagementWeb.Controllers
                     {
                         Id = item.Id,
                         Title = item.Title,
+                        Description = item.Description,
                         Content = item.Content,
                         CreatedDate = item.CreatedDate,
                         CategoryName = item.PostCategory?.Name ?? "",
@@ -73,6 +74,7 @@ namespace CompanyManagementWeb.Controllers
                     {
                         Id = item.Id,
                         Title = item.Title,
+                        Description = item.Description,
                         Content = item.Content,
                         CreatedDate = item.CreatedDate,
                         CategoryName = item.PostCategory?.Name ?? "",
@@ -97,15 +99,25 @@ namespace CompanyManagementWeb.Controllers
                 return NotFound();
             }
 
-            var post = await _context.Posts
-                .Include(p => p.Employee)
-                .FirstOrDefaultAsync(m => m.Id == id);
+            var post = await _context.Posts.FindAsync(id);
             if (post == null)
             {
                 return NotFound();
             }
 
-            return View(post);
+            PostViewModel postViewModel = new()
+            {
+                Id = post.Id,
+                Title = post.Title,
+                Description = post.Description,
+                Content = post.Content,
+                CreatedDate = post.CreatedDate,
+                CategoryName = post.PostCategory?.Name ?? "",
+                DepartmentName = post.Department?.Name ?? "",
+                EmployeeName = post.Employee?.Name ?? "",
+            };
+
+            return View(postViewModel);
         }
 
         // GET: UploadPost/Create
@@ -132,6 +144,7 @@ namespace CompanyManagementWeb.Controllers
                 Post post = new Post
                 {
                     Title = postViewModel.Title,
+                    Description = postViewModel.Description,
                     Content = postViewModel.Content,
                     CreatedDate = DateTime.Now,
                     PostCategoryId = postViewModel.CategoryID.Value,
@@ -165,6 +178,7 @@ namespace CompanyManagementWeb.Controllers
             {
                 Id = post.Id,
                 Title = post.Title,
+                Description = post.Description,
                 Content = post.Content,
                 CategoryID = post.PostCategoryId,
                 DepartmentId = post.DepartmentId,
@@ -191,6 +205,7 @@ namespace CompanyManagementWeb.Controllers
                     }
                     post.Title = postViewModel.Title;
                     post.Content = postViewModel.Content;
+                    post.Description = postViewModel.Description;
                     post.PostCategoryId = postViewModel.CategoryID.Value;
                     post.DepartmentId = postViewModel.DepartmentId;
 
@@ -232,6 +247,7 @@ namespace CompanyManagementWeb.Controllers
             {
                 Id = post.Id,
                 Title = post.Title,
+                Description = post.Description,
                 Content = post.Content,
                 CreatedDate = post.CreatedDate,
                 CategoryName = post.PostCategory?.Name ?? "",
