@@ -45,7 +45,7 @@
 {
     <div class="border mt-5">
         <div>@item.Title</div>
-        <div>@item.Content</div>
+        <div>@Html.Raw(item.Content)</div>
         <div>@item.CreatedDate</div>
         <div>@item.CategoryName</div>
         <div>@item.DepartmentName</div>

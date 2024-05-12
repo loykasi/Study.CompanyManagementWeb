@@ -3,13 +3,14 @@
 @{
     ViewData["Title"] = "Create";
 }
-
+<link rel="stylesheet" href="~/lib/summernote/summernote-lite.min.css" />
+@* <link href="https://cdn.jsdelivr.net/npm/summernote@0.8.18/dist/summernote.min.css" rel="stylesheet"> *@
 <h1>Create</h1>
 
 <h4>Post</h4>
 <hr />
 <div class="row">
-    <div class="col-md-4">
+    <div class="col-md-12">
         <form asp-action="Create">
             <div asp-validation-summary="ModelOnly" class="text-danger"></div>
             <div class="form-group">
@@ -44,5 +45,12 @@
 </div>
 
 @section Scripts {
+    <script src="~/lib/summernote/summernote-lite.min.js"></script>
+    @* <script src="https://cdn.jsdelivr.net/npm/summernote@0.8.18/dist/summernote.min.js"></script> *@
+    <script>
+        $(document).ready(function() {
+            $('#Content').summernote();
+        });
+    </script>
     @{await Html.RenderPartialAsync("_ValidationScriptsPartial");}
 }
