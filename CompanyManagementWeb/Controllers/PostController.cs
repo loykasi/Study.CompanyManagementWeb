@@ -1,4 +1,5 @@
-﻿using CompanyManagementWeb.DataAccess;
+﻿using CompanyManagementWeb.Attributes;
+using CompanyManagementWeb.DataAccess;
 using CompanyManagementWeb.Models;
 using CompanyManagementWeb.ViewModels;
 using Microsoft.AspNetCore.Authorization;
@@ -19,7 +20,7 @@ namespace CompanyManagementWeb.Controllers
         }
 
         // GET: UploadPost
-        // [Authorize]
+        [JwtAuthorizationFilter]
         public async Task<IActionResult> Index()
         {
             PostIndexViewModel postIndexViewModel = new()

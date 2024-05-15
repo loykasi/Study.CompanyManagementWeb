@@ -3,6 +3,7 @@ using System.Text;
 using CompanyManagementWeb.DataAccess;
 using CompanyManagementWeb.Models;
 using CompanyManagementWeb.ViewModels;
+using CompanyManagementWeb.Authentication;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
@@ -56,7 +57,7 @@ namespace CompanyManagementWeb.Controllers
                 _context.Add(user);
                 _context.SaveChanges();
 
-                var accessToken = GenerateJSONWebToken();
+                var accessToken = JwtHelper.GenerateJSONWebToken(_configuration);
                 SetJWTCookie(accessToken);
 
                 return RedirectToAction(nameof(Index), "Home");
@@ -95,7 +96,7 @@ namespace CompanyManagementWeb.Controllers
                 return View(loginViewModel);
             }
 
-            var accessToken = GenerateJSONWebToken();
+            var accessToken = JwtHelper.GenerateJSONWebToken(_configuration);
             SetJWTCookie(accessToken);
 
             return RedirectToAction(nameof(Index), "Home");
@@ -105,19 +106,6 @@ namespace CompanyManagementWeb.Controllers
         {
             HttpContext.Session.Clear();
             return RedirectToAction(nameof(Index));
-        }
-
-        private string GenerateJSONWebToken()
-        {
-            var securityKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(_configuration.GetSection("Jwt:Key").Value!));
-            var credentials = new SigningCredentials(securityKey, SecurityAlgorithms.HmacSha256);
- 
-            var token = new JwtSecurityToken(
-                expires: DateTime.Now.AddDays(1),
-                signingCredentials: credentials
-                );
- 
-            return new JwtSecurityTokenHandler().WriteToken(token);
         }
  
         private void SetJWTCookie(string token)
