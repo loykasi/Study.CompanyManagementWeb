@@ -1,6 +1,7 @@
 ﻿using CompanyManagementWeb.DataAccess;
 using CompanyManagementWeb.Models;
 using CompanyManagementWeb.ViewModels;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.EntityFrameworkCore;
@@ -18,6 +19,7 @@ namespace CompanyManagementWeb.Controllers
         }
 
         // GET: UploadPost
+        // [Authorize]
         public async Task<IActionResult> Index()
         {
             PostIndexViewModel postIndexViewModel = new()

@@ -8,7 +8,7 @@ namespace CompanyManagementWeb.DataAccess
         public CompanyManagementDbContext(DbContextOptions<CompanyManagementDbContext> options) : base(options)
         { }
 
-        public DbSet<Employee> Employees { get; set; }
+        public DbSet<User> Users { get; set; }
         public DbSet<Post> Posts { get; set; }
         public DbSet<Schedule> Schedules { get; set; }
         public DbSet<PostCategory> PostCategories { get; set; }
