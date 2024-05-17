@@ -1,15 +1,9 @@
-using System.IdentityModel.Tokens.Jwt;
-using System.Text;
 using CompanyManagementWeb.DataAccess;
 using CompanyManagementWeb.Models;
 using CompanyManagementWeb.ViewModels;
-using CompanyManagementWeb.Authentication;
-using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.AspNetCore.Mvc.Rendering;
-using Microsoft.EntityFrameworkCore;
-using Microsoft.IdentityModel.Tokens;
+using CompanyManagementWeb.Services;
 
 namespace CompanyManagementWeb.Controllers
 {
@@ -17,11 +11,13 @@ namespace CompanyManagementWeb.Controllers
     {
         private readonly CompanyManagementDbContext _context;
         private readonly IConfiguration _configuration;
+        private readonly ITokenService _tokenService;
 
-        public IdentityController(CompanyManagementDbContext context, IConfiguration configuration)
+        public IdentityController(CompanyManagementDbContext context, IConfiguration configuration, ITokenService tokenService)
         {
             _context = context;
             _configuration = configuration;
+            _tokenService = tokenService;
         }
 
         public async Task<IActionResult> Index()
@@ -57,7 +53,7 @@ namespace CompanyManagementWeb.Controllers
                 _context.Add(user);
                 _context.SaveChanges();
 
-                var accessToken = JwtHelper.GenerateJSONWebToken(_configuration);
+                var accessToken = _tokenService.GenerateAccessToken();
                 SetJWTCookie(accessToken);
 
                 return RedirectToAction(nameof(Index), "Home");
@@ -96,28 +92,49 @@ namespace CompanyManagementWeb.Controllers
                 return View(loginViewModel);
             }
 
-            var accessToken = JwtHelper.GenerateJSONWebToken(_configuration);
-            SetJWTCookie(accessToken);
+            var token = _tokenService.GenerateToken();
+            SetJWTCookie(token.AccessToken!);
+            SetRefreshTokenCookie(user, token.RefreshToken!);
+            HttpContext.Session.SetInt32("userId", user.Id);
 
             return RedirectToAction(nameof(Index), "Home");
         }
 
         public IActionResult Logout()
         {
+            Response.Cookies.Delete("jwtCookie");
+            Response.Cookies.Delete("refreshTokenCookie");
             HttpContext.Session.Clear();
+            var user = _context.Users.FirstOrDefault(u => u.Id == HttpContext.Session.GetInt32("userId"));
+            if (user != null)
+            {
+                user.RefreshToken = null;
+                _context.SaveChanges();
+            }
             return RedirectToAction(nameof(Index));
         }
  
         private void SetJWTCookie(string token)
         {
-            // var cookieOptions = new CookieOptions
-            // {
-            //     HttpOnly = true,
-            //     Expires = DateTime.UtcNow.AddHours(3),
-            // };
-            // Response.Cookies.Append("jwtCookie", token, cookieOptions);
-            System.Diagnostics.Debug.WriteLine("JWT: " + token, "(LOG)");
-            HttpContext.Session.SetString("Token", token);
+            var cookieOptions = new CookieOptions
+            {
+                HttpOnly = true,
+                Expires = DateTime.UtcNow.AddDays(3),
+            };
+            Response.Cookies.Append("jwtCookie", token, cookieOptions);
+        }
+
+        private void SetRefreshTokenCookie(User user, string token)
+        {
+            var cookieOptions = new CookieOptions
+            {
+                HttpOnly = true,
+                Expires = DateTime.UtcNow.AddDays(7),
+            };
+            Response.Cookies.Append("refreshTokenCookie", token, cookieOptions);
+
+            user.RefreshToken = token;
+            _context.SaveChanges();
         }
     }
 }

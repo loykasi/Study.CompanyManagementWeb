@@ -7,6 +7,7 @@
         public string? Email { get; set; }
         public string? PasswordHash { get; set; }
 
+        public string? RefreshToken { get; set; }
         public int? DepartmentId { get; set; }
         public Department? Department { get; set; }
     }

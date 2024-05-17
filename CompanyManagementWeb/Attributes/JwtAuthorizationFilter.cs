@@ -1,5 +1,4 @@
-using CompanyManagementWeb.Authentication;
-using Microsoft.AspNetCore.Authorization;
+using CompanyManagementWeb.Services;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Filters;
 
@@ -10,21 +9,38 @@ namespace CompanyManagementWeb.Attributes
     {
         public void OnAuthorization(AuthorizationFilterContext context)
         {
-            string token = context.HttpContext.Session.GetString("Token");
-            if (token == null)
+            // string token = context.HttpContext.Session.GetString("Token");
+            string token = context.HttpContext.Request.Cookies["jwtCookie"]!;
+
+            if (string.IsNullOrEmpty(token))
             {
-                System.Diagnostics.Debug.WriteLine("Redirect", "(LOG)");
+                System.Diagnostics.Debug.WriteLine("Redirect", "(AUTHENTICATION)");
                 context.Result = new RedirectToActionResult("Login", "Identity", null);
                 return;
             }
-            IConfiguration configuration = context.HttpContext.RequestServices.GetRequiredService<IConfiguration>();
-            if (!JwtHelper.ValidateToken(configuration, token))
+
+            ITokenService tokenService = context.HttpContext.RequestServices.GetRequiredService<ITokenService>();
+
+            if (!tokenService.ValidateAccessToken(token))
             {
-                System.Diagnostics.Debug.WriteLine("Redirect", "(LOG)");
+                System.Diagnostics.Debug.WriteLine("Jwt token invalid", "(AUTHENTICATION)");
+                string refreshToken = context.HttpContext.Request.Cookies["refreshTokenCookie"]!;
+                if(tokenService.IsRefreshTokenValid(refreshToken))
+                {
+                    var tokens = tokenService.GenerateToken();
+                    tokenService.SetJWTCookie(context.HttpContext, tokens.AccessToken!);
+                    tokenService.SetRefreshTokenCookie(context.HttpContext, context.HttpContext.Session.GetInt32("userId").Value, tokens.RefreshToken!);
+                    System.Diagnostics.Debug.WriteLine("Refresh token successful", "(AUTHENTICATION)");
+                    return;
+                }
+
+                System.Diagnostics.Debug.WriteLine("Token invalid, login again", "(AUTHENTICATION)");
                 context.Result = new RedirectToActionResult("Login", "Identity", null);
                 return;
             }
-            System.Diagnostics.Debug.WriteLine("Authorize successful", "(LOG)");
+
+
+            System.Diagnostics.Debug.WriteLine("Authorize successful", "(AUTHENTICATION)");
         }
     }
 }

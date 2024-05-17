@@ -1,5 +1,6 @@
 using System.Text;
 using CompanyManagementWeb.DataAccess;
+using CompanyManagementWeb.Services;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
@@ -35,6 +36,8 @@ builder.Services.AddSession(options =>
 {
     options.Cookie.HttpOnly = true;
 });
+
+builder.Services.AddScoped<ITokenService, TokenService>();
 
 var app = builder.Build();
 

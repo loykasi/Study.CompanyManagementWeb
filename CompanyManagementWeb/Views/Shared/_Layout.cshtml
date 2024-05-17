@@ -32,9 +32,12 @@
                             <a class="nav-link text-dark" asp-area="" asp-controller="Schedule" asp-action="Index">Schedule</a>
                         </li>
                         <li class="nav-item">
+                            <a class="nav-link text-dark" asp-area="" asp-controller="Identity" asp-action="Login">Login</a>
+                        </li>
+                        <li class="nav-item">
                             <a class="button text-dark" asp-area="" asp-controller="Identity" asp-action="Logout">Log out</a>
                         </li>
-                        @if(Context.Session.GetString("Token") != null)
+                        @if(Context.Request.Cookies["jwtCookie"] != null)
                         {
                             <li class="nav-item">
                                 Hello User!
