@@ -15,6 +15,6 @@
         public Department? Department { get; set; }
 
         public int EmployeeId { get; set; }
-        public Employee? Employee { get; set; }
+        public User? Employee { get; set; }
     }
 }

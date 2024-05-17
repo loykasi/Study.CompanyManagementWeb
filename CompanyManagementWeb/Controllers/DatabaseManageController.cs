@@ -67,10 +67,10 @@ namespace CompanyManagementWeb.Controllers
             _dbContext.Departments.Add(departments[6]);
             await _dbContext.SaveChangesAsync();
 
-            _dbContext.Employees.Add(new Employee { Name = "Lam An", DepartmentId = departments[0].Id });
-            _dbContext.Employees.Add(new Employee { Name = "Khanh Duy", DepartmentId = departments[1].Id });
-            _dbContext.Employees.Add(new Employee { Name = "Ngoc Tin", DepartmentId = departments[2].Id });
-            _dbContext.Employees.Add(new Employee { Name = "Thu Thuy", DepartmentId = departments[3].Id });
+            _dbContext.Users.Add(new User { Name = "Lam An", DepartmentId = departments[0].Id });
+            _dbContext.Users.Add(new User { Name = "Khanh Duy", DepartmentId = departments[1].Id });
+            _dbContext.Users.Add(new User { Name = "Ngoc Tin", DepartmentId = departments[2].Id });
+            _dbContext.Users.Add(new User { Name = "Thu Thuy", DepartmentId = departments[3].Id });
             await _dbContext.SaveChangesAsync();
 
             StatusMessage = "Vừa seed Database";

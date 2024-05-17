@@ -5,14 +5,14 @@
 namespace CompanyManagementWeb.Migrations
 {
     /// <inheritdoc />
-    public partial class update1 : Migration
+    public partial class update2 : Migration
     {
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
         {
             migrationBuilder.AddColumn<string>(
-                name: "Description",
-                table: "Posts",
+                name: "RefreshToken",
+                table: "Users",
                 type: "nvarchar(max)",
                 nullable: true);
         }
@@ -21,8 +21,8 @@ namespace CompanyManagementWeb.Migrations
         protected override void Down(MigrationBuilder migrationBuilder)
         {
             migrationBuilder.DropColumn(
-                name: "Description",
-                table: "Posts");
+                name: "RefreshToken",
+                table: "Users");
         }
     }
 }
