@@ -1,3 +1,4 @@
+using CompanyManagementWeb.Data;
 using CompanyManagementWeb.DataAccess;
 using CompanyManagementWeb.Models;
 using CompanyManagementWeb.ViewModels;
@@ -8,10 +9,12 @@ namespace CompanyManagementWeb.Controllers
     public class CompanyController : Controller
     {
         private readonly CompanyManagementDbContext _context;
+        private readonly ILogger<CompanyController> _logger;
 
-        public CompanyController(CompanyManagementDbContext context)
+        public CompanyController(CompanyManagementDbContext context, ILogger<CompanyController> logger)
         {
             _context = context;
+            _logger = logger;
         }
 
         public IActionResult Create()
@@ -41,7 +44,41 @@ namespace CompanyManagementWeb.Controllers
             _context.SaveChanges();
 
             HttpContext.Session.SetInt32("companyId", company.Id);
-            System.Diagnostics.Debug.WriteLine("Set company Id: " + company.Id, "SESSION");
+
+            return RedirectToAction("Index", "Home");
+        }
+
+        public IActionResult Join()
+        {
+            return View();
+        }
+
+        [HttpPost]
+        public IActionResult Join(string code)
+        {
+            _logger.LogInformation("Company code: {code}", code);
+            
+            var company = _context.Companies.FirstOrDefault(c => c.Code == code);
+            if (company == null)
+            {
+                return View();
+            }
+
+            UserCompany userCompany = new()
+            {
+                UserId = HttpContext.Session.GetInt32(SessionVariable.UserId).Value,
+                CompanyId = company.Id
+            };
+
+            var companyContext = _context.UserCompanies.FirstOrDefault(u => u.UserId == userCompany.UserId);
+            if (companyContext != null)
+            {
+                _context.Remove(companyContext);
+            }
+            _context.Add(userCompany);
+            _context.SaveChanges();
+
+            HttpContext.Session.SetInt32("companyId", company.Id);
 
             return RedirectToAction("Index", "Home");
         }

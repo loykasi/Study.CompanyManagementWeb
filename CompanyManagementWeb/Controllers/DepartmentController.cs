@@ -3,6 +3,7 @@ using Microsoft.EntityFrameworkCore;
 using CompanyManagementWeb.DataAccess;
 using CompanyManagementWeb.Models;
 using CompanyManagementWeb.ViewModels;
+using CompanyManagementWeb.Attributes;
 
 namespace CompanyManagementWeb.Controllers
 {
@@ -16,6 +17,7 @@ namespace CompanyManagementWeb.Controllers
         }
 
         // GET: Department
+        [JwtAuthorizationFilter]
         public async Task<IActionResult> Index()
         {
             int companyId = HttpContext.Session.GetInt32("companyId").Value;
@@ -24,6 +26,7 @@ namespace CompanyManagementWeb.Controllers
         }
 
         // GET: Department/Create
+        [JwtAuthorizationFilter]
         public IActionResult Create()
         {
             return View();
@@ -31,6 +34,7 @@ namespace CompanyManagementWeb.Controllers
 
         // POST: Department/Create
         [HttpPost]
+        [JwtAuthorizationFilter]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Create(DepartmentCreateViewModel departmentCreateViewModel)
         {
@@ -49,6 +53,7 @@ namespace CompanyManagementWeb.Controllers
         }
 
         // GET: Department/Edit/5
+        [JwtAuthorizationFilter]
         public async Task<IActionResult> Edit(int? id)
         {
             if (id == null)
@@ -71,6 +76,7 @@ namespace CompanyManagementWeb.Controllers
 
         // POST: Department/Edit/5
         [HttpPost]
+        [JwtAuthorizationFilter]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Edit(DepartmentCreateViewModel departmentCreateViewModel)
         {
@@ -100,6 +106,7 @@ namespace CompanyManagementWeb.Controllers
         }
 
         // GET: Department/Delete/5
+        [JwtAuthorizationFilter]
         public async Task<IActionResult> Delete(int? id)
         {
             if (id == null)
@@ -120,6 +127,7 @@ namespace CompanyManagementWeb.Controllers
 
         // POST: Department/Delete/5
         [HttpPost, ActionName("Delete")]
+        [JwtAuthorizationFilter]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> DeleteConfirmed(int id)
         {

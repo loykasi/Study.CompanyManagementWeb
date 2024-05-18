@@ -57,6 +57,7 @@ namespace CompanyManagementWeb.Controllers
             return View(postIndexViewModel);
         }
 
+        [JwtAuthorizationFilter]
         public async Task<IActionResult> Search(PostIndexViewModel postIndexViewModel)
         {
             IQueryable<Post> posts = _context.Posts;
@@ -104,6 +105,7 @@ namespace CompanyManagementWeb.Controllers
         }
 
         // GET: UploadPost/Details/5
+        [JwtAuthorizationFilter]
         public async Task<IActionResult> Details(int? id)
         {
             if (id == null)
@@ -137,6 +139,7 @@ namespace CompanyManagementWeb.Controllers
         }
 
         // GET: UploadPost/Create
+        [JwtAuthorizationFilter]
         public IActionResult Create()
         {
             PostCreateViewModel postCreateViewModel = new()
@@ -149,6 +152,7 @@ namespace CompanyManagementWeb.Controllers
 
         // POST: UploadPost/Create
         [HttpPost]
+        [JwtAuthorizationFilter]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Create(PostCreateViewModel postViewModel)
         {
@@ -178,6 +182,7 @@ namespace CompanyManagementWeb.Controllers
         }
 
         // GET: UploadPost/Edit/5
+        [JwtAuthorizationFilter]
         public async Task<IActionResult> Edit(int? id)
         {
             if (id == null)
@@ -208,6 +213,7 @@ namespace CompanyManagementWeb.Controllers
 
         // POST: UploadPost/Edit/5
         [HttpPost]
+        [JwtAuthorizationFilter]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Edit(PostCreateViewModel postViewModel)
         {
@@ -247,6 +253,7 @@ namespace CompanyManagementWeb.Controllers
         }
 
         // GET: UploadPost/Delete/5
+        [JwtAuthorizationFilter]
         public async Task<IActionResult> Delete(int? id)
         {
             if (id == null)
@@ -281,6 +288,7 @@ namespace CompanyManagementWeb.Controllers
 
         // POST: UploadPost/Delete/5
         [HttpPost, ActionName("Delete")]
+        [JwtAuthorizationFilter]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> DeleteConfirmed(int id)
         {
