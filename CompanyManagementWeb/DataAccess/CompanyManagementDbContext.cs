@@ -13,5 +13,7 @@ namespace CompanyManagementWeb.DataAccess
         public DbSet<Schedule> Schedules { get; set; }
         public DbSet<PostCategory> PostCategories { get; set; }
         public DbSet<Department> Departments { get; set; }
+        public DbSet<Company> Companies { get; set; }
+        public DbSet<UserCompany> UserCompanies { get; set; }
     }
 }

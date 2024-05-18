@@ -22,7 +22,6 @@ namespace CompanyManagementWeb.Controllers
 
         public async Task<IActionResult> Index()
         {
-            
             return View();
         }
 
@@ -53,8 +52,14 @@ namespace CompanyManagementWeb.Controllers
                 _context.Add(user);
                 _context.SaveChanges();
 
-                var accessToken = _tokenService.GenerateAccessToken();
-                SetJWTCookie(accessToken);
+                var token = _tokenService.GenerateToken(user);
+                SetJWTCookie(token.AccessToken!);
+                SetRefreshTokenCookie(user, token.RefreshToken!);
+                HttpContext.Session.SetInt32("userId", user.Id);
+            
+                var userCompany = _context.UserCompanies.FirstOrDefault(u => u.UserId == user.Id);
+                if (userCompany != null)
+                    HttpContext.Session.SetInt32("companyId", userCompany.CompanyId);
 
                 return RedirectToAction(nameof(Index), "Home");
             }
@@ -92,10 +97,14 @@ namespace CompanyManagementWeb.Controllers
                 return View(loginViewModel);
             }
 
-            var token = _tokenService.GenerateToken();
+            var token = _tokenService.GenerateToken(user);
             SetJWTCookie(token.AccessToken!);
             SetRefreshTokenCookie(user, token.RefreshToken!);
+
             HttpContext.Session.SetInt32("userId", user.Id);
+            var userCompany = _context.UserCompanies.FirstOrDefault(u => u.UserId == user.Id);
+            if (userCompany != null)
+                HttpContext.Session.SetInt32("companyId", userCompany.CompanyId);
 
             return RedirectToAction(nameof(Index), "Home");
         }

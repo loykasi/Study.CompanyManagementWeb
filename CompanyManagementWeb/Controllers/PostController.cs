@@ -1,4 +1,5 @@
 ﻿using CompanyManagementWeb.Attributes;
+using CompanyManagementWeb.Data;
 using CompanyManagementWeb.DataAccess;
 using CompanyManagementWeb.Models;
 using CompanyManagementWeb.ViewModels;
@@ -28,7 +29,11 @@ namespace CompanyManagementWeb.Controllers
                 Posts = new List<PostViewModel>()
             };
 
-            var schedules = _context.Posts.Include(s => s.PostCategory).Include(s => s.Employee).Include(s => s.Department);
+            
+            var schedules = _context.Posts.Include(s => s.PostCategory)
+                                            .Include(s => s.Employee)
+                                            .Include(s => s.Department)
+                                            .Where(d => d.PostCategory.CompanyId == GetCompanyId());;
             foreach (var item in schedules)
             {
                 postIndexViewModel.Posts.Add(new PostViewModel
@@ -52,6 +57,7 @@ namespace CompanyManagementWeb.Controllers
             return View(postIndexViewModel);
         }
 
+        [JwtAuthorizationFilter]
         public async Task<IActionResult> Search(PostIndexViewModel postIndexViewModel)
         {
             IQueryable<Post> posts = _context.Posts;
@@ -99,6 +105,7 @@ namespace CompanyManagementWeb.Controllers
         }
 
         // GET: UploadPost/Details/5
+        [JwtAuthorizationFilter]
         public async Task<IActionResult> Details(int? id)
         {
             if (id == null)
@@ -132,18 +139,20 @@ namespace CompanyManagementWeb.Controllers
         }
 
         // GET: UploadPost/Create
+        [JwtAuthorizationFilter]
         public IActionResult Create()
         {
             PostCreateViewModel postCreateViewModel = new()
             {
-                Categories = new SelectList(_context.PostCategories, "Id", "Name"),
-                Departments = new SelectList(_context.Departments, "Id", "Name")
+                Categories = new SelectList(_context.PostCategories.Where(p => p.CompanyId == GetCompanyId()), "Id", "Name"),
+                Departments = new SelectList(_context.Departments.Where(d => d.CompanyId == GetCompanyId()), "Id", "Name")
             };
             return View(postCreateViewModel);
         }
 
         // POST: UploadPost/Create
         [HttpPost]
+        [JwtAuthorizationFilter]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Create(PostCreateViewModel postViewModel)
         {
@@ -161,6 +170,7 @@ namespace CompanyManagementWeb.Controllers
                     PostCategoryId = postViewModel.CategoryID.Value,
                     DepartmentId = postViewModel.DepartmentId,
                     EmployeeId = employeeId,
+                    // CompanyId = HttpContext.Session.GetInt32(SessionVariable.CompanyId).Value
                 };
 
                 _context.Add(post);
@@ -172,6 +182,7 @@ namespace CompanyManagementWeb.Controllers
         }
 
         // GET: UploadPost/Edit/5
+        [JwtAuthorizationFilter]
         public async Task<IActionResult> Edit(int? id)
         {
             if (id == null)
@@ -202,6 +213,7 @@ namespace CompanyManagementWeb.Controllers
 
         // POST: UploadPost/Edit/5
         [HttpPost]
+        [JwtAuthorizationFilter]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Edit(PostCreateViewModel postViewModel)
         {
@@ -241,6 +253,7 @@ namespace CompanyManagementWeb.Controllers
         }
 
         // GET: UploadPost/Delete/5
+        [JwtAuthorizationFilter]
         public async Task<IActionResult> Delete(int? id)
         {
             if (id == null)
@@ -275,6 +288,7 @@ namespace CompanyManagementWeb.Controllers
 
         // POST: UploadPost/Delete/5
         [HttpPost, ActionName("Delete")]
+        [JwtAuthorizationFilter]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> DeleteConfirmed(int id)
         {
@@ -291,6 +305,11 @@ namespace CompanyManagementWeb.Controllers
         private bool PostExists(int id)
         {
             return _context.Posts.Any(e => e.Id == id);
+        }
+
+        private int GetCompanyId()
+        {
+            return HttpContext.Session.GetInt32(SessionVariable.CompanyId).Value;
         }
     }
 }

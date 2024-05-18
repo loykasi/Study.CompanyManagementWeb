@@ -1,4 +1,5 @@
 using System.IdentityModel.Tokens.Jwt;
+using System.Security.Claims;
 using System.Security.Cryptography;
 using System.Text;
 using CompanyManagementWeb.DataAccess;
@@ -18,23 +19,28 @@ namespace CompanyManagementWeb.Services
             _context = context;
         }
 
-        public Token GenerateToken()
+        public Token GenerateToken(User user)
         {
             return new Token
             {
-                AccessToken = GenerateAccessToken(),
+                AccessToken = GenerateAccessToken(user),
                 RefreshToken = GenerateRefreshToken()
             };
         }
 
-        public string GenerateAccessToken()
+        public string GenerateAccessToken(User user)
         {
             var securityKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(_configuration.GetSection("Jwt:Key").Value!));
             var credentials = new SigningCredentials(securityKey, SecurityAlgorithms.HmacSha256);
- 
+            var claim = new Claim[]
+            {
+                new Claim("id", user.Id.ToString())
+            };
+
             var token = new JwtSecurityToken(
                 expires: DateTime.Now.AddMinutes(1),
-                signingCredentials: credentials
+                signingCredentials: credentials,
+                claims: claim
                 );
  
             return new JwtSecurityTokenHandler().WriteToken(token);
@@ -70,6 +76,40 @@ namespace CompanyManagementWeb.Services
 
                 // var jwtToken = (JwtSecurityToken)validatedToken;
                 // var userId = int.Parse(jwtToken.Claims.First(x => x.Type == "id").Value);
+                return true;
+            }
+            catch
+            {
+                return false;
+            }
+        }
+
+        public bool TryGetPrincipalFromToken(string token, out ClaimsPrincipal? claims)
+        {
+            claims = null;
+            try
+            {
+                var Key = Encoding.UTF8.GetBytes(_configuration.GetSection("Jwt:Key").Value!);
+
+                var tokenValidationParameters = new TokenValidationParameters
+                {
+                    ValidateIssuer = false,
+                    ValidateAudience = false,
+                    ValidateLifetime = false,
+                    ValidateIssuerSigningKey = true,
+                    IssuerSigningKey = new SymmetricSecurityKey(Key),
+                    ClockSkew = TimeSpan.Zero
+                };
+
+                var tokenHandler = new JwtSecurityTokenHandler();
+                var principal = tokenHandler.ValidateToken(token, tokenValidationParameters, out SecurityToken securityToken);
+                if (securityToken is not JwtSecurityToken jwtSecurityToken 
+                        || !jwtSecurityToken.Header.Alg.Equals(SecurityAlgorithms.HmacSha256, StringComparison.InvariantCultureIgnoreCase))
+                {
+                    throw new SecurityTokenException("Invalid token");
+                }
+
+                claims = principal;
                 return true;
             }
             catch

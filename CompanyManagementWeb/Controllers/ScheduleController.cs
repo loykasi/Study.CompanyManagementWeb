@@ -1,13 +1,10 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
-using Microsoft.AspNetCore.Mvc;
+﻿using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.EntityFrameworkCore;
 using CompanyManagementWeb.DataAccess;
 using CompanyManagementWeb.Models;
 using CompanyManagementWeb.ViewModels;
+using CompanyManagementWeb.Data;
 
 namespace CompanyManagementWeb.Controllers
 {
@@ -28,7 +25,7 @@ namespace CompanyManagementWeb.Controllers
                 Schedules = new List<ScheduleViewModel>()
             };
 
-            var schedules = _context.Schedules.Include(s => s.Employee).Include(s => s.Department);
+            var schedules = _context.Schedules.Include(s => s.Employee).Include(s => s.Department).Where(d => d.CompanyId == GetCompanyId());;
             foreach (var item in schedules)
             {
                 scheduleIndexViewModel.Schedules.Add(new ScheduleViewModel
@@ -94,7 +91,7 @@ namespace CompanyManagementWeb.Controllers
         {
             ScheduleEditViewModel scheduleViewModel = new()
             {
-                Departments = new SelectList(_context.Departments, "Id", "Name")
+                Departments = new SelectList(_context.Departments.Where(d => d.CompanyId == GetCompanyId()), "Id", "Name")
             };
             return View(scheduleViewModel);
         }
@@ -103,11 +100,7 @@ namespace CompanyManagementWeb.Controllers
         [HttpPost]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Create(ScheduleEditViewModel scheduleViewModel)
-        {
-            // System.Diagnostics.Debug.WriteLine("LOG: " + scheduleViewModel.Date.Value);
-            // System.Diagnostics.Debug.WriteLine("LOG: " + scheduleViewModel.StartTime.Value);
-            // System.Diagnostics.Debug.WriteLine("LOG: " + scheduleViewModel.EndTime.Value);
-            
+        {   
             if (ModelState.IsValid)
             {
                 // To do: get current user ID
@@ -122,7 +115,8 @@ namespace CompanyManagementWeb.Controllers
                     EndDate = new DateTime(scheduleViewModel.Date.Value.Year, scheduleViewModel.Date.Value.Month, scheduleViewModel.Date.Value.Day,
                                             scheduleViewModel.EndTime.Value.Hour, scheduleViewModel.EndTime.Value.Minute, scheduleViewModel.EndTime.Value.Second),
                     EmployeeId = employeeId,
-                    DepartmentId = scheduleViewModel.DepartmentId
+                    DepartmentId = scheduleViewModel.DepartmentId,
+                    CompanyId = GetCompanyId()
                 };
 
                 _context.Add(schedule);
@@ -250,6 +244,11 @@ namespace CompanyManagementWeb.Controllers
         private bool ScheduleExists(int id)
         {
             return _context.Schedules.Any(e => e.Id == id);
+        }
+
+        private int GetCompanyId()
+        {
+            return HttpContext.Session.GetInt32(SessionVariable.CompanyId).Value;
         }
     }
 }

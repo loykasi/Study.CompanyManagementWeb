@@ -1,11 +1,9 @@
 namespace CompanyManagementWeb.Models
 {
-    public class PostCategory
+    public class Company
     {
         public int Id { get; set; }
         public string? Name { get; set; }
-
-        public int CompanyId { get; set; }
-        public Company? Company { get; set; }
+        public string? Code { get; set; }
     }
 }
