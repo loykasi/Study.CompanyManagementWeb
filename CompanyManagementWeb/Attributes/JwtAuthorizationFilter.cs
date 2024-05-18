@@ -9,6 +9,9 @@ namespace CompanyManagementWeb.Attributes
     {
         public void OnAuthorization(AuthorizationFilterContext context)
         {
+            System.Diagnostics.Debug.WriteLine("jwt auth", "(Filter)");
+
+
             // string token = context.HttpContext.Session.GetString("Token");
             string token = context.HttpContext.Request.Cookies["jwtCookie"]!;
 

@@ -84,29 +84,38 @@ namespace CompanyManagementWeb.Services
             }
         }
 
-        public ClaimsPrincipal GetPrincipalFromExpiredToken(string token)
+        public bool TryGetPrincipalFromToken(string token, out ClaimsPrincipal? claims)
         {
-            var Key = Encoding.UTF8.GetBytes(_configuration.GetSection("Jwt:Key").Value!);
-
-            var tokenValidationParameters = new TokenValidationParameters
+            claims = null;
+            try
             {
-                ValidateIssuer = false,
-                ValidateAudience = false,
-                ValidateLifetime = false,
-                ValidateIssuerSigningKey = true,
-                IssuerSigningKey = new SymmetricSecurityKey(Key),
-                ClockSkew = TimeSpan.Zero
-            };
+                var Key = Encoding.UTF8.GetBytes(_configuration.GetSection("Jwt:Key").Value!);
 
-            var tokenHandler = new JwtSecurityTokenHandler();
-            var principal = tokenHandler.ValidateToken(token, tokenValidationParameters, out SecurityToken securityToken);
-            if (securityToken is not JwtSecurityToken jwtSecurityToken 
-                    || !jwtSecurityToken.Header.Alg.Equals(SecurityAlgorithms.HmacSha256, StringComparison.InvariantCultureIgnoreCase))
-            {
-                throw new SecurityTokenException("Invalid token");
+                var tokenValidationParameters = new TokenValidationParameters
+                {
+                    ValidateIssuer = false,
+                    ValidateAudience = false,
+                    ValidateLifetime = false,
+                    ValidateIssuerSigningKey = true,
+                    IssuerSigningKey = new SymmetricSecurityKey(Key),
+                    ClockSkew = TimeSpan.Zero
+                };
+
+                var tokenHandler = new JwtSecurityTokenHandler();
+                var principal = tokenHandler.ValidateToken(token, tokenValidationParameters, out SecurityToken securityToken);
+                if (securityToken is not JwtSecurityToken jwtSecurityToken 
+                        || !jwtSecurityToken.Header.Alg.Equals(SecurityAlgorithms.HmacSha256, StringComparison.InvariantCultureIgnoreCase))
+                {
+                    throw new SecurityTokenException("Invalid token");
+                }
+
+                claims = principal;
+                return true;
             }
-
-            return principal;
+            catch
+            {
+                return false;
+            }
         }
 
         public bool IsRefreshTokenValid(string refreshToken)

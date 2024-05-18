@@ -9,7 +9,7 @@ namespace CompanyManagementWeb.Services
         // public string GenerateAccessToken();
         // public string GenerateRefreshToken();
         public bool ValidateAccessToken(string token);
-        public ClaimsPrincipal GetPrincipalFromExpiredToken(string token);
+        public bool TryGetPrincipalFromToken(string token, out ClaimsPrincipal? claims);
 
         public bool IsRefreshTokenValid(string refreshToken);
         public void SetJWTCookie(HttpContext httpContext, string token);
