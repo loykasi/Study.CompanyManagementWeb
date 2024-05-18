@@ -27,7 +27,7 @@ namespace CompanyManagementWeb.Attributes
                 string refreshToken = context.HttpContext.Request.Cookies["refreshTokenCookie"]!;
                 if(tokenService.IsRefreshTokenValid(refreshToken))
                 {
-                    var tokens = tokenService.GenerateToken();
+                    var tokens = tokenService.GenerateToken(new Models.User { Id = context.HttpContext.Session.GetInt32("userId").Value });
                     tokenService.SetJWTCookie(context.HttpContext, tokens.AccessToken!);
                     tokenService.SetRefreshTokenCookie(context.HttpContext, context.HttpContext.Session.GetInt32("userId").Value, tokens.RefreshToken!);
                     System.Diagnostics.Debug.WriteLine("Refresh token successful", "(AUTHENTICATION)");

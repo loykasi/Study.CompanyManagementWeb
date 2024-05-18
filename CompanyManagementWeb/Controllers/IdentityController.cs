@@ -53,7 +53,7 @@ namespace CompanyManagementWeb.Controllers
                 _context.Add(user);
                 _context.SaveChanges();
 
-                var token = _tokenService.GenerateToken();
+                var token = _tokenService.GenerateToken(user);
                 SetJWTCookie(token.AccessToken!);
                 SetRefreshTokenCookie(user, token.RefreshToken!);
                 HttpContext.Session.SetInt32("userId", user.Id);
@@ -94,7 +94,7 @@ namespace CompanyManagementWeb.Controllers
                 return View(loginViewModel);
             }
 
-            var token = _tokenService.GenerateToken();
+            var token = _tokenService.GenerateToken(user);
             SetJWTCookie(token.AccessToken!);
             SetRefreshTokenCookie(user, token.RefreshToken!);
             HttpContext.Session.SetInt32("userId", user.Id);
