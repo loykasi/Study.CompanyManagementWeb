@@ -131,6 +131,9 @@ namespace CompanyManagementWeb.Migrations
 
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
 
+                    b.Property<int>("CompanyId")
+                        .HasColumnType("int");
+
                     b.Property<int?>("DepartmentId")
                         .HasColumnType("int");
 
@@ -150,6 +153,8 @@ namespace CompanyManagementWeb.Migrations
                         .HasColumnType("nvarchar(max)");
 
                     b.HasKey("Id");
+
+                    b.HasIndex("CompanyId");
 
                     b.HasIndex("DepartmentId");
 
@@ -260,6 +265,12 @@ namespace CompanyManagementWeb.Migrations
 
             modelBuilder.Entity("CompanyManagementWeb.Models.Schedule", b =>
                 {
+                    b.HasOne("CompanyManagementWeb.Models.Company", "Company")
+                        .WithMany()
+                        .HasForeignKey("CompanyId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
                     b.HasOne("CompanyManagementWeb.Models.Department", "Department")
                         .WithMany()
                         .HasForeignKey("DepartmentId");
@@ -269,6 +280,8 @@ namespace CompanyManagementWeb.Migrations
                         .HasForeignKey("EmployeeId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
+
+                    b.Navigation("Company");
 
                     b.Navigation("Department");
 

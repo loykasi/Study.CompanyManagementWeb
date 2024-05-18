@@ -11,6 +11,9 @@
         public int? DepartmentId { get; set; }
         public Department? Department { get; set; }
 
+        public int CompanyId { get; set; }
+        public Company? Company { get; set; }
+
         public int EmployeeId { get; set; }
         public User? Employee { get; set; }
     }

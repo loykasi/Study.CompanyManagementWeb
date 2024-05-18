@@ -18,8 +18,9 @@ namespace CompanyManagementWeb.Controllers
         // GET: Department
         public async Task<IActionResult> Index()
         {
-            var companyManagementDbContext = _context.Departments.Include(d => d.Company);
-            return View(await companyManagementDbContext.ToListAsync());
+            int companyId = HttpContext.Session.GetInt32("companyId").Value;
+            var departments = _context.Departments.Include(d => d.Company).Where(d => d.CompanyId == companyId);
+            return View(await departments.ToListAsync());
         }
 
         // GET: Department/Create

@@ -1,4 +1,5 @@
 ﻿using CompanyManagementWeb.Attributes;
+using CompanyManagementWeb.Data;
 using CompanyManagementWeb.DataAccess;
 using CompanyManagementWeb.Models;
 using CompanyManagementWeb.ViewModels;
@@ -28,7 +29,11 @@ namespace CompanyManagementWeb.Controllers
                 Posts = new List<PostViewModel>()
             };
 
-            var schedules = _context.Posts.Include(s => s.PostCategory).Include(s => s.Employee).Include(s => s.Department);
+            
+            var schedules = _context.Posts.Include(s => s.PostCategory)
+                                            .Include(s => s.Employee)
+                                            .Include(s => s.Department)
+                                            .Where(d => d.PostCategory.CompanyId == GetCompanyId());;
             foreach (var item in schedules)
             {
                 postIndexViewModel.Posts.Add(new PostViewModel
@@ -136,8 +141,8 @@ namespace CompanyManagementWeb.Controllers
         {
             PostCreateViewModel postCreateViewModel = new()
             {
-                Categories = new SelectList(_context.PostCategories, "Id", "Name"),
-                Departments = new SelectList(_context.Departments, "Id", "Name")
+                Categories = new SelectList(_context.PostCategories.Where(p => p.CompanyId == GetCompanyId()), "Id", "Name"),
+                Departments = new SelectList(_context.Departments.Where(d => d.CompanyId == GetCompanyId()), "Id", "Name")
             };
             return View(postCreateViewModel);
         }
@@ -161,6 +166,7 @@ namespace CompanyManagementWeb.Controllers
                     PostCategoryId = postViewModel.CategoryID.Value,
                     DepartmentId = postViewModel.DepartmentId,
                     EmployeeId = employeeId,
+                    // CompanyId = HttpContext.Session.GetInt32(SessionVariable.CompanyId).Value
                 };
 
                 _context.Add(post);
@@ -291,6 +297,11 @@ namespace CompanyManagementWeb.Controllers
         private bool PostExists(int id)
         {
             return _context.Posts.Any(e => e.Id == id);
+        }
+
+        private int GetCompanyId()
+        {
+            return HttpContext.Session.GetInt32(SessionVariable.CompanyId).Value;
         }
     }
 }

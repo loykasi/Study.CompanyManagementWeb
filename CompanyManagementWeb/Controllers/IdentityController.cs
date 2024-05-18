@@ -57,6 +57,10 @@ namespace CompanyManagementWeb.Controllers
                 SetJWTCookie(token.AccessToken!);
                 SetRefreshTokenCookie(user, token.RefreshToken!);
                 HttpContext.Session.SetInt32("userId", user.Id);
+            
+                var userCompany = _context.UserCompanies.FirstOrDefault(u => u.UserId == user.Id);
+                if (userCompany != null)
+                    HttpContext.Session.SetInt32("companyId", userCompany.CompanyId);
 
                 return RedirectToAction(nameof(Index), "Home");
             }
@@ -97,7 +101,11 @@ namespace CompanyManagementWeb.Controllers
             var token = _tokenService.GenerateToken(user);
             SetJWTCookie(token.AccessToken!);
             SetRefreshTokenCookie(user, token.RefreshToken!);
+
             HttpContext.Session.SetInt32("userId", user.Id);
+            var userCompany = _context.UserCompanies.FirstOrDefault(u => u.UserId == user.Id);
+            if (userCompany != null)
+                HttpContext.Session.SetInt32("companyId", userCompany.CompanyId);
 
             return RedirectToAction(nameof(Index), "Home");
         }

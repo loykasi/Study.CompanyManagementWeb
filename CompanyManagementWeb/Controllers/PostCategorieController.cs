@@ -23,7 +23,9 @@ namespace CompanyManagementWeb.Controllers
         // GET: PostCategorie
         public async Task<IActionResult> Index()
         {
-            return View(await _context.PostCategories.ToListAsync());
+            int companyId = HttpContext.Session.GetInt32("companyId").Value;
+            var PostCategories = _context.PostCategories.Where(d => d.CompanyId == companyId);
+            return View(await PostCategories.ToListAsync());
         }
 
         // GET: PostCategorie/Details/5
