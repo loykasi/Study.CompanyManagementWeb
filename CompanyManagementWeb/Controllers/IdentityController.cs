@@ -53,8 +53,10 @@ namespace CompanyManagementWeb.Controllers
                 _context.Add(user);
                 _context.SaveChanges();
 
-                var accessToken = _tokenService.GenerateAccessToken();
-                SetJWTCookie(accessToken);
+                var token = _tokenService.GenerateToken();
+                SetJWTCookie(token.AccessToken!);
+                SetRefreshTokenCookie(user, token.RefreshToken!);
+                HttpContext.Session.SetInt32("userId", user.Id);
 
                 return RedirectToAction(nameof(Index), "Home");
             }

@@ -1,5 +1,6 @@
 using System.Text;
 using CompanyManagementWeb.DataAccess;
+using CompanyManagementWeb.Middlewares;
 using CompanyManagementWeb.Services;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.EntityFrameworkCore;
@@ -49,12 +50,13 @@ if (!app.Environment.IsDevelopment())
     app.UseHsts();
 }
 
+app.UseSession();
+app.UseMiddleware<KeepLoginMiddleware>();
+
 app.UseHttpsRedirection();
 app.UseStaticFiles();
 
 app.UseRouting();
-
-app.UseSession();
 
 app.UseAuthentication();
 app.UseAuthorization();

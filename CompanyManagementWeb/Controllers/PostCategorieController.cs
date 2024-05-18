@@ -7,6 +7,7 @@ using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.EntityFrameworkCore;
 using CompanyManagementWeb.DataAccess;
 using CompanyManagementWeb.Models;
+using CompanyManagementWeb.ViewModels;
 
 namespace CompanyManagementWeb.Controllers
 {
@@ -50,19 +51,22 @@ namespace CompanyManagementWeb.Controllers
         }
 
         // POST: PostCategorie/Create
-        // To protect from overposting attacks, enable the specific properties you want to bind to.
-        // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Create([Bind("Id,Name")] PostCategory postCategory)
+        public async Task<IActionResult> Create(PostCategoryCreateViewModel postCategoryCreateViewModel)
         {
             if (ModelState.IsValid)
             {
+                PostCategory postCategory = new()
+                {
+                    Name = postCategoryCreateViewModel.Name,
+                    CompanyId = HttpContext.Session.GetInt32("companyId").Value
+                };
                 _context.Add(postCategory);
                 await _context.SaveChangesAsync();
                 return RedirectToAction(nameof(Index));
             }
-            return View(postCategory);
+            return View(postCategoryCreateViewModel);
         }
 
         // GET: PostCategorie/Edit/5
@@ -78,31 +82,31 @@ namespace CompanyManagementWeb.Controllers
             {
                 return NotFound();
             }
-            return View(postCategory);
+            PostCategoryCreateViewModel postCategoryCreateViewModel = new()
+            {
+                Id = postCategory.Id,
+                Name = postCategory.Name,
+            };
+            return View(postCategoryCreateViewModel);
         }
 
         // POST: PostCategorie/Edit/5
-        // To protect from overposting attacks, enable the specific properties you want to bind to.
-        // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Edit(int id, [Bind("Id,Name")] PostCategory postCategory)
+        public async Task<IActionResult> Edit(PostCategoryCreateViewModel postCategoryCreateViewModel)
         {
-            if (id != postCategory.Id)
-            {
-                return NotFound();
-            }
-
             if (ModelState.IsValid)
             {
                 try
                 {
+                    var postCategory = _context.PostCategories.FirstOrDefault(d => d.Id == postCategoryCreateViewModel.Id);
+                    postCategory.Name = postCategoryCreateViewModel.Name;
                     _context.Update(postCategory);
                     await _context.SaveChangesAsync();
                 }
                 catch (DbUpdateConcurrencyException)
                 {
-                    if (!PostCategoryExists(postCategory.Id))
+                    if (!PostCategoryExists(postCategoryCreateViewModel.Id))
                     {
                         return NotFound();
                     }
@@ -113,7 +117,7 @@ namespace CompanyManagementWeb.Controllers
                 }
                 return RedirectToAction(nameof(Index));
             }
-            return View(postCategory);
+            return View(postCategoryCreateViewModel);
         }
 
         // GET: PostCategorie/Delete/5
