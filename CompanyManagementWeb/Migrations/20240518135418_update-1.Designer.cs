@@ -4,6 +4,7 @@ using CompanyManagementWeb.DataAccess;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
@@ -11,9 +12,11 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace CompanyManagementWeb.Migrations
 {
     [DbContext(typeof(CompanyManagementDbContext))]
-    partial class CompanyManagementDbContextModelSnapshot : ModelSnapshot
+    [Migration("20240518135418_update-1")]
+    partial class update1
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -60,22 +63,6 @@ namespace CompanyManagementWeb.Migrations
                     b.HasIndex("CompanyId");
 
                     b.ToTable("Departments");
-                });
-
-            modelBuilder.Entity("CompanyManagementWeb.Models.Permission", b =>
-                {
-                    b.Property<int>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("int");
-
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
-
-                    b.Property<string>("Name")
-                        .HasColumnType("nvarchar(max)");
-
-                    b.HasKey("Id");
-
-                    b.ToTable("Permissions");
                 });
 
             modelBuilder.Entity("CompanyManagementWeb.Models.Post", b =>
@@ -139,22 +126,6 @@ namespace CompanyManagementWeb.Migrations
                     b.ToTable("PostCategories");
                 });
 
-            modelBuilder.Entity("CompanyManagementWeb.Models.Resource", b =>
-                {
-                    b.Property<int>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("int");
-
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
-
-                    b.Property<string>("Name")
-                        .HasColumnType("nvarchar(max)");
-
-                    b.HasKey("Id");
-
-                    b.ToTable("Resources");
-                });
-
             modelBuilder.Entity("CompanyManagementWeb.Models.Role", b =>
                 {
                     b.Property<int>("Id")
@@ -184,20 +155,16 @@ namespace CompanyManagementWeb.Migrations
 
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
 
-                    b.Property<int>("PermissionId")
-                        .HasColumnType("int");
+                    b.Property<string>("Permission")
+                        .HasColumnType("nvarchar(max)");
 
-                    b.Property<int>("ResourceId")
-                        .HasColumnType("int");
+                    b.Property<string>("Resource")
+                        .HasColumnType("nvarchar(max)");
 
                     b.Property<int>("RoleId")
                         .HasColumnType("int");
 
                     b.HasKey("Id");
-
-                    b.HasIndex("PermissionId");
-
-                    b.HasIndex("ResourceId");
 
                     b.HasIndex("RoleId");
 
@@ -362,27 +329,11 @@ namespace CompanyManagementWeb.Migrations
 
             modelBuilder.Entity("CompanyManagementWeb.Models.RolePermission", b =>
                 {
-                    b.HasOne("CompanyManagementWeb.Models.Permission", "Permission")
-                        .WithMany()
-                        .HasForeignKey("PermissionId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.HasOne("CompanyManagementWeb.Models.Resource", "Resource")
-                        .WithMany()
-                        .HasForeignKey("ResourceId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
                     b.HasOne("CompanyManagementWeb.Models.Role", "Role")
                         .WithMany()
                         .HasForeignKey("RoleId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
-
-                    b.Navigation("Permission");
-
-                    b.Navigation("Resource");
 
                     b.Navigation("Role");
                 });

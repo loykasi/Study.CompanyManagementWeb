@@ -1,0 +1,44 @@
+﻿@model CompanyManagementWeb.ViewModels.RoleIndexViewModel
+
+@{
+    ViewData["Title"] = "Index";
+}
+
+<h1>Index</h1>
+
+<p>
+    <a asp-action="Create">Create New</a>
+</p>
+@foreach (var item in Model.Roles)
+{
+<div class="border mb-3">
+    @item.Name
+    <table class="table">
+        <thead>
+            <tr>
+                <th>
+                    Nội dung
+                </th>
+                <th>
+                    Quyền hạn
+                </th>
+            </tr>
+        </thead>
+        <tbody>
+    @foreach (var detail in item.RoleDetails)
+    {
+        <tr>
+            <td>
+                @detail.Resource
+            </td>
+            <td>
+                @detail.Permission
+            </td>
+        </tr>
+    }
+        </tbody>
+    </table>
+    <a asp-action="Edit" asp-route-id="@item.Id">Edit</a>
+    <a asp-action="Delete" asp-route-id="@item.Id">Delete</a>
+</div>
+}
