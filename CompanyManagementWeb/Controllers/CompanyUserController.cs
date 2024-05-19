@@ -50,7 +50,7 @@ namespace CompanyManagementWeb.Controllers
         }
 
         [HttpPost]
-        public async Task<IActionResult> SetDepartment(int userId, int departmentId)
+        public async Task<IActionResult> SetDepartment(int userId, int? departmentId)
         {
             _logger.LogInformation("userId: {userId} | departmentId: {departmentId}", userId, departmentId);
             var userCompany = _context.UserCompanies.FirstOrDefault(u => u.UserId == userId);
@@ -63,7 +63,7 @@ namespace CompanyManagementWeb.Controllers
         }
 
         [HttpPost]
-        public async Task<IActionResult> SetRole(int userId, int roleId)
+        public async Task<IActionResult> SetRole(int userId, int? roleId)
         {
             _logger.LogInformation("userId: {userId} | roleId: {departmentId}", userId, roleId);
             var userCompany = _context.UserCompanies.FirstOrDefault(u => u.UserId == userId);

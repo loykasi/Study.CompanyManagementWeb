@@ -73,11 +73,11 @@ namespace CompanyManagementWeb.Controllers
             //_dbContext.Users.Add(new User { Name = "Ngoc Tin", DepartmentId = departments[2].Id });
             //_dbContext.Users.Add(new User { Name = "Thu Thuy", DepartmentId = departments[3].Id });
 
-            _dbContext.Resources.Add(new Resource { Name = ResourceVariable.Post.ToString() });
-            _dbContext.Resources.Add(new Resource { Name = ResourceVariable.Schedule.ToString() });
+            _dbContext.Resources.Add(new Resource { Name = ResourceVariable.Get(ResourceEnum.Post) });
+            _dbContext.Resources.Add(new Resource { Name = ResourceVariable.Get(ResourceEnum.Schedule) });
 
-            _dbContext.Permissions.Add(new Permission { Name = PermissionVariable.Edit.ToString() });
-            _dbContext.Permissions.Add(new Permission { Name = PermissionVariable.View.ToString() });
+            _dbContext.Permissions.Add(new Permission { Name = PermissionVariable.Get(PermissionEnum.Edit) });
+            _dbContext.Permissions.Add(new Permission { Name = PermissionVariable.Get(PermissionEnum.View) });
             await _dbContext.SaveChangesAsync();
 
             StatusMessage = "Vừa seed Database";

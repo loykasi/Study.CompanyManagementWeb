@@ -1,13 +1,23 @@
 namespace CompanyManagementWeb.Data
 {
-    public enum PermissionVariable
+    public enum PermissionEnum
     {
+        None,
         Edit,
         View
+    }
+    
+    public class PermissionVariable
+    {
+        public static string Get(PermissionEnum permissionEnum)
+        {
+            return permissionEnum switch
+            {
+                PermissionEnum.None => "None",
+                PermissionEnum.Edit => "Edit",
+                PermissionEnum.View => "View",
+                _ => string.Empty,
+            };
+        }
     }  
-    // public class PermissionVariable
-    // {
-    //     public static readonly string Edit = "Edit";
-    //     public static readonly string View = "View";
-    // }  
 }

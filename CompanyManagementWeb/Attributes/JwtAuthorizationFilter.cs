@@ -1,18 +1,32 @@
+using CompanyManagementWeb.Data;
+using CompanyManagementWeb.DataAccess;
 using CompanyManagementWeb.Services;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Filters;
+using Microsoft.EntityFrameworkCore;
 
 namespace CompanyManagementWeb.Attributes
 {
     [AttributeUsage(AttributeTargets.Class | AttributeTargets.Method)]
     public class JwtAuthorizationFilter : Attribute, IAuthorizationFilter
     {
+        public ResourceEnum Resource { get; set; }
+        public PermissionEnum Permission { get; set; }
+
+        public JwtAuthorizationFilter(ResourceEnum resource, PermissionEnum permission)
+        {
+            Resource = resource;
+            Permission = permission;
+        }
+
+        public JwtAuthorizationFilter()
+        {
+            Resource = ResourceEnum.None;
+            Permission = PermissionEnum.None;
+        }
+
         public void OnAuthorization(AuthorizationFilterContext context)
         {
-            System.Diagnostics.Debug.WriteLine("jwt auth", "(Filter)");
-
-
-            // string token = context.HttpContext.Session.GetString("Token");
             string token = context.HttpContext.Request.Cookies["jwtCookie"]!;
 
             if (string.IsNullOrEmpty(token))
@@ -42,8 +56,36 @@ namespace CompanyManagementWeb.Attributes
                 return;
             }
 
+            CompanyManagementDbContext dbContext = context.HttpContext.RequestServices.GetRequiredService<CompanyManagementDbContext>();
+            int userId = context.HttpContext.Session.GetInt32(SessionVariable.UserId).Value;
+            if (Resource != ResourceEnum.None && Permission != PermissionEnum.None)
+            {
+                int roleId = dbContext.UserCompanies.FirstOrDefault(u => u.UserId == userId).RoleId ?? 0;
+                bool isPermitted = dbContext.RolePermissions
+                                                .Include(r => r.Resource)
+                                                .Include(r => r.Permission)
+                                                .Any(r => r.RoleId == roleId 
+                                                        && r.Resource.Name.Equals(GetResourceName()) 
+                                                        && r.Permission.Name.Equals(GetPermissionName()));
+
+                if (!isPermitted)
+                {
+                    context.Result = new RedirectToActionResult("Login", "Identity", null);
+                    return;
+                }
+            }
+
+            var departmentId = dbContext.UserCompanies.FirstOrDefault(u => u.UserId == userId).DepartmentId;
+            if (departmentId == null)
+            {
+                context.Result = new RedirectToActionResult("Login", "Identity", null);
+                return;
+            }
 
             System.Diagnostics.Debug.WriteLine("Authorize successful", "(AUTHENTICATION)");
         }
+
+        private string? GetResourceName() => ResourceVariable.Get(Resource);
+        private string? GetPermissionName() => PermissionVariable.Get(Permission);
     }
 }
