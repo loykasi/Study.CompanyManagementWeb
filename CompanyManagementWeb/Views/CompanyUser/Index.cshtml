@@ -1,0 +1,112 @@
+@* @model CompanyManagementWeb.ViewModels.CompanyUserIndexViewModel *@
+
+@{
+    ViewData["Title"] = "Index";
+}
+
+<h1>Index</h1>
+
+<p>
+    <a asp-action="Create">Create New</a>
+</p>
+
+<table class="table">
+    <thead>
+        <tr>
+            <th>
+                Người tham gia
+            </th>
+            <th>
+                Phòng ban
+            </th>
+            <th>
+                Quyền hạn
+            </th>
+        </tr>
+    </thead>
+    <tbody id="content">
+        @* @for (int i = 0; i < Model.CompanyUsers.Count; i++)
+        {
+            <tr>
+                <th>
+                    @Model.CompanyUsers[i].Name
+                </th>
+                <th>
+                    <select id="department" onchange="selectDepartment(@Model.CompanyUsers[i].Id, this)" asp-for="@Model.CompanyUsers[i].DepartmentId" class ="form-control" asp-items="@Model.CompanyUsers[i].Departments">
+                        <option value="">Select</option>
+                    </select>
+                </th>
+                <th>
+                    <select id="role" onchange="selectDepartment(@Model.CompanyUsers[i].Id, this)" asp-for="@Model.CompanyUsers[i].RoleId" class ="form-control" asp-items="@Model.CompanyUsers[i].Roles">
+                        <option value="">Select</option>
+                    </select>
+                </th>
+                <th>
+                    <a onclick="deleteUser(@Model.CompanyUsers[i].Id)" class="button">Delete</a>
+                </th>
+            </tr>
+        } *@
+        <partial name="CompanyUsersPartial" model="Model">
+    </tbody>
+</table>
+
+
+@section Scripts {
+    <script>
+        function selectDepartment(userId, selectObject) {
+            console.log('call post');
+            $.ajax({
+                type: 'post',
+                url: '@Url.Action("SetDepartment")',
+                dataType: "json",
+                data: {
+                    userId: userId,
+                    departmentId: selectObject.value
+                },
+                success: function (response) {
+                    console.log(response);
+                },
+                error: function (response, status, error) {
+                    console.log(status);
+                },
+            });
+        };
+
+        function selectRole(userId, selectObject) {
+            console.log('call post');
+            $.ajax({
+                type: 'post',
+                url: '@Url.Action("SetRole")',
+                dataType: "json",
+                data: {
+                    userId: userId,
+                    roleId: selectObject.value
+                },
+                success: function (response) {
+                    console.log(response);
+                },
+                error: function (response, status, error) {
+                    console.log(status);
+                },
+            });
+        };
+
+        function deleteUser(userId) {
+            console.log('call post');
+            $.ajax({
+                type: 'post',
+                url: '@Url.Action("Delete")',
+                data: {
+                    userId: userId
+                },
+                success: function (response) {
+                    $('#content').html(response);
+                    console.log(response);
+                },
+                error: function (response, status, error) {
+                    console.log(status);
+                },
+            });
+        }
+    </script>
+}

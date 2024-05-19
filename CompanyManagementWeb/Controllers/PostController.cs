@@ -21,7 +21,7 @@ namespace CompanyManagementWeb.Controllers
         }
 
         // GET: UploadPost
-        [JwtAuthorizationFilter]
+        [JwtAuthorizationFilter(resource: ResourceEnum.Post, permission: PermissionEnum.Edit)]
         public async Task<IActionResult> Index()
         {
             PostIndexViewModel postIndexViewModel = new()

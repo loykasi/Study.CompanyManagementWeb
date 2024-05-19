@@ -1,5 +1,3 @@
-using System.ComponentModel.DataAnnotations;
-
 namespace CompanyManagementWeb.Models
 {
     public class UserCompany
@@ -11,5 +9,11 @@ namespace CompanyManagementWeb.Models
         
         public int CompanyId { get; set; }
         public Company? Company { get; set; }
+
+        public int? RoleId { get; set; }
+        public Role? Role { get; set; }
+
+        public int? DepartmentId { get; set; }
+        public Department? Department { get; set; }
     }
 }
