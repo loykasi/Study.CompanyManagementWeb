@@ -1,6 +1,7 @@
 using System.Security.Claims;
 using CompanyManagementWeb.DataAccess;
 using CompanyManagementWeb.Services;
+using Microsoft.EntityFrameworkCore;
 
 namespace CompanyManagementWeb.Middlewares
 {
@@ -34,7 +35,7 @@ namespace CompanyManagementWeb.Middlewares
 
                 if (!tokenService.ValidateAccessToken(accessToken))
                 {
-                    if (tokenService.IsRefreshTokenValid(refreshToken))
+                    if (await tokenService.IsRefreshTokenValid(refreshToken))
                     {
                         if (tokenService.TryGetPrincipalFromToken(accessToken, out ClaimsPrincipal claims))
                         {
@@ -71,7 +72,7 @@ namespace CompanyManagementWeb.Middlewares
 
                 context.Session.SetInt32("userId", userId);
                 context.Session.SetInt32("loginStatus", 1);
-                var userCompany = dbContext.UserCompanies.FirstOrDefault(u => u.UserId == userId);
+                var userCompany = await dbContext.UserCompanies.FirstOrDefaultAsync(u => u.UserId == userId);
                 if (userCompany != null)
                     context.Session.SetInt32("companyId", userCompany.CompanyId);
 

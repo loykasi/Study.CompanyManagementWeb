@@ -31,58 +31,101 @@ namespace CompanyManagementWeb.Attributes
 
             if (string.IsNullOrEmpty(token))
             {
-                System.Diagnostics.Debug.WriteLine("Redirect", "(AUTHENTICATION)");
-                context.Result = new RedirectToActionResult("Login", "Identity", null);
+                RedirectToLogin(context);
                 return;
             }
 
-            ITokenService tokenService = context.HttpContext.RequestServices.GetRequiredService<ITokenService>();
+            int? userId = context.HttpContext.Session.GetInt32("userId");
+            if (!userId.HasValue)
+            {
+                RedirectToLogin(context);
+                return;
+            }
 
+            if (!IsAccessTokenValid(context, token, userId.Value))
+            {
+                RedirectToLogin(context);
+                return;
+            }
+
+            if (!IsPermitted(context, userId.Value))
+            {
+                RedirectToLogin(context);
+                return;
+            }
+        }
+
+        private bool IsAccessTokenValid(AuthorizationFilterContext context, string token, int userId)
+        {
+            ITokenService tokenService = context.HttpContext.RequestServices.GetRequiredService<ITokenService>();
             if (!tokenService.ValidateAccessToken(token))
             {
-                System.Diagnostics.Debug.WriteLine("Jwt token invalid", "(AUTHENTICATION)");
                 string refreshToken = context.HttpContext.Request.Cookies["refreshTokenCookie"]!;
-                if(tokenService.IsRefreshTokenValid(refreshToken))
+                if(!tokenService.IsRefreshTokenValid(refreshToken).Result)
                 {
-                    var tokens = tokenService.GenerateToken(new Models.User { Id = context.HttpContext.Session.GetInt32("userId").Value });
-                    tokenService.SetJWTCookie(context.HttpContext, tokens.AccessToken!);
-                    tokenService.SetRefreshTokenCookie(context.HttpContext, context.HttpContext.Session.GetInt32("userId").Value, tokens.RefreshToken!);
-                    System.Diagnostics.Debug.WriteLine("Refresh token successful", "(AUTHENTICATION)");
-                    return;
+                    return false;   
                 }
-
-                System.Diagnostics.Debug.WriteLine("Token invalid, login again", "(AUTHENTICATION)");
-                context.Result = new RedirectToActionResult("Login", "Identity", null);
-                return;
+                var tokens = tokenService.GenerateToken(new Models.User { Id = userId });
+                tokenService.SetJWTCookie(context.HttpContext, tokens.AccessToken!);
+                tokenService.SetRefreshTokenCookie(context.HttpContext, userId, tokens.RefreshToken!);
             }
+            return true;
+        }
 
+        private bool IsPermitted(AuthorizationFilterContext context, int userId)
+        {
             CompanyManagementDbContext dbContext = context.HttpContext.RequestServices.GetRequiredService<CompanyManagementDbContext>();
-            int userId = context.HttpContext.Session.GetInt32(SessionVariable.UserId).Value;
+            bool isAdmin = false;
             if (Resource != ResourceEnum.None && Permission != PermissionEnum.None)
             {
                 int roleId = dbContext.UserCompanies.FirstOrDefault(u => u.UserId == userId).RoleId ?? 0;
-                bool isPermitted = dbContext.RolePermissions
+
+                var role = dbContext.Roles.Find(roleId);
+                bool isPermitted;
+
+                if (role != null && role.IsAdmin)
+                {
+                    isPermitted = true;
+                    isAdmin = true;
+                }
+                else
+                {
+                    var userPermission = dbContext.RolePermissions
                                                 .Include(r => r.Resource)
                                                 .Include(r => r.Permission)
-                                                .Any(r => r.RoleId == roleId 
-                                                        && r.Resource.Name.Equals(GetResourceName()) 
-                                                        && r.Permission.Name.Equals(GetPermissionName()));
+                                                .FirstOrDefault(r => r.RoleId == roleId && r.Resource.Name.Equals(GetResourceName()));
+                    isPermitted = IsInPermission(userPermission.Permission.Name);
+                }
 
                 if (!isPermitted)
                 {
-                    context.Result = new RedirectToActionResult("Login", "Identity", null);
-                    return;
+                    return false;
                 }
             }
 
             var departmentId = dbContext.UserCompanies.FirstOrDefault(u => u.UserId == userId).DepartmentId;
-            if (departmentId == null)
+            if (!isAdmin && departmentId == null)
             {
-                context.Result = new RedirectToActionResult("Login", "Identity", null);
-                return;
+                return false;
             }
 
-            System.Diagnostics.Debug.WriteLine("Authorize successful", "(AUTHENTICATION)");
+            return true;
+        }
+
+        private void RedirectToLogin(AuthorizationFilterContext context)
+        {
+            context.Result = new RedirectToActionResult("Login", "Identity", null);
+        }
+
+        private bool IsInPermission(string userPermission)
+        {
+            return userPermission switch
+            {
+                null => false,
+                "View" => userPermission.Equals(GetPermissionName()),
+                "Edit" => userPermission.Equals(GetPermissionName()) || Permission == PermissionEnum.View,
+                _ => false,
+            };
         }
 
         private string? GetResourceName() => ResourceVariable.Get(Resource);

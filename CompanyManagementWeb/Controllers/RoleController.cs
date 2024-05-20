@@ -81,20 +81,17 @@ namespace CompanyManagementWeb.Controllers
                 _context.Add(role);
                 await _context.SaveChangesAsync();
 
-                if (!roleCreateViewModel.IsAdmin)
+                foreach (var item in roleCreateViewModel.RoleDetails)
                 {
-                    foreach (var item in roleCreateViewModel.RoleDetails)
+                    RolePermission rolePermission = new()
                     {
-                        RolePermission rolePermission = new()
-                        {
-                            RoleId = role.Id,
-                            ResourceId = item.ResourceId,
-                            PermissionId = item.PermissionId
-                        };
-                        _context.Add(rolePermission);
-                    }
-                    await _context.SaveChangesAsync();
+                        RoleId = role.Id,
+                        ResourceId = item.ResourceId,
+                        PermissionId = item.PermissionId
+                    };
+                    _context.Add(rolePermission);
                 }
+                await _context.SaveChangesAsync();
 
                 return RedirectToAction(nameof(Index));
             }
@@ -173,37 +170,10 @@ namespace CompanyManagementWeb.Controllers
                     await _context.SaveChangesAsync();
 
                     var rolePermissions = _context.RolePermissions.Where(r => r.RoleId == roleCreateViewModel.Id);
-                    if (!roleCreateViewModel.IsAdmin)
+                    foreach (var item in roleCreateViewModel.RoleDetails)
                     {
-                        if (rolePermissions.Any())
-                        {
-                            foreach (var item in roleCreateViewModel.RoleDetails)
-                            {
-                                var detail = rolePermissions.FirstOrDefault(r => r.ResourceId == item.ResourceId);
-                                detail.PermissionId = item.PermissionId;
-                            }
-                        }
-                        else
-                        {
-                            foreach (var item in roleCreateViewModel.RoleDetails)
-                            {
-                                RolePermission rolePermission = new()
-                                {
-                                    RoleId = role.Id,
-                                    ResourceId = item.ResourceId,
-                                    PermissionId = item.PermissionId
-                                };
-                                _context.Add(rolePermission);
-                            }
-                        }
-                    await _context.SaveChangesAsync();
-                    }
-                    else
-                    {
-                        foreach (var item in rolePermissions)
-                        {
-                            _context.RolePermissions.Remove(item);
-                        }
+                        var detail = rolePermissions.FirstOrDefault(r => r.ResourceId == item.ResourceId);
+                        detail.PermissionId = item.PermissionId;
                     }
 
                     await _context.SaveChangesAsync();

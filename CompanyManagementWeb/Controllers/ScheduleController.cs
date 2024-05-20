@@ -25,7 +25,7 @@ namespace CompanyManagementWeb.Controllers
                 Schedules = new List<ScheduleViewModel>()
             };
 
-            var schedules = _context.Schedules.Include(s => s.Employee).Include(s => s.Department).Where(d => d.CompanyId == GetCompanyId());;
+            var schedules = _context.Schedules.Include(s => s.Employee).Include(s => s.Department).Where(d => d.CompanyId == GetCompanyId());
             foreach (var item in schedules)
             {
                 scheduleIndexViewModel.Schedules.Add(new ScheduleViewModel
@@ -52,9 +52,7 @@ namespace CompanyManagementWeb.Controllers
 
         public IActionResult Search(ScheduleIndexViewModel scheduleIndexViewModel)
         {
-            System.Diagnostics.Debug.WriteLine("LOG (Search): " + scheduleIndexViewModel.DepartmentId);
-            
-            IQueryable<Schedule> schedules = _context.Schedules;
+            IQueryable<Schedule> schedules = _context.Schedules.Where(d => d.CompanyId == GetCompanyId());
 
             if (scheduleIndexViewModel.DepartmentId != null)
             {

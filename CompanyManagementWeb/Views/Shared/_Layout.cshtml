@@ -22,7 +22,7 @@
                     <ul class="navbar-nav">
                         @if (userService.IsLogged())
                         {
-                            @if (userService.IsInCompany())
+                            @if (userService.IsInCompany().Result)
                             {
                                 <li class="nav-item">
                                     <a class="nav-link text-dark" asp-area="" asp-controller="Post" asp-action="Index">Bài đăng</a>
@@ -47,25 +47,25 @@
                                 }
                                 else
                                 {
-                                    @if (userService.IsInPermission("PostCategory", "Edit"))
+                                    @if (await userService.IsInPermission("PostCategory", "View"))
                                     {
                                         <li class="nav-item">
                                             <a class="nav-link text-dark" asp-area="" asp-controller="PostCategory" asp-action="Index">Danh mục bài đăng</a>
                                         </li>
                                     }
-                                    @if (userService.IsInPermission("Department", "Edit"))
+                                    @if (await userService.IsInPermission("Department", "View"))
                                     {
                                         <li class="nav-item">
                                             <a class="nav-link text-dark" asp-area="" asp-controller="Department" asp-action="Index">Phòng ban</a>
                                         </li>
                                     }
-                                    @if (userService.IsInPermission("Role", "Edit"))
+                                    @if (await userService.IsInPermission("Role", "View"))
                                     {
                                         <li class="nav-item">
                                             <a class="nav-link text-dark" asp-area="" asp-controller="Role" asp-action="Index">Vai trò</a>
                                         </li>
                                     }
-                                    @if (userService.IsInPermission("Member", "Edit"))
+                                    @if (await userService.IsInPermission("Member", "View"))
                                     {
                                         <li class="nav-item">
                                             <a class="nav-link text-dark" asp-area="" asp-controller="CompanyUser" asp-action="Index">Người tham gia</a>
@@ -84,9 +84,7 @@
                     <ul class="navbar-nav ms-auto">
                         @if (Context.Session.GetInt32(CompanyManagementWeb.Data.SessionVariable.UserId) != null)
                         {
-                            <li class="nav-item">
-                                <p>Hello User!</p>
-                            </li>
+                            <span class="navbar-text">Hello User!</span>
                             <li class="nav-item">
                                 <a class="nav-link text-dark" asp-area="" asp-controller="Identity" asp-action="Logout">Log out</a>
                             </li>

@@ -5,6 +5,7 @@ using CompanyManagementWeb.ViewModels;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.AspNetCore.Mvc.Rendering;
+using CompanyManagementWeb.Attributes;
 
 namespace CompanyManagementWeb.Controllers
 {
@@ -19,6 +20,7 @@ namespace CompanyManagementWeb.Controllers
             _logger = logger;
         }
 
+        [JwtAuthorizationFilter(resource: ResourceEnum.Member, permission: PermissionEnum.View)]
         public async Task<IActionResult> Index()
         {
             CompanyUserIndexViewModel companyUserIndexViewModel = new()
@@ -49,6 +51,7 @@ namespace CompanyManagementWeb.Controllers
             return View(companyUserIndexViewModel);
         }
 
+        [JwtAuthorizationFilter(resource: ResourceEnum.Member, permission: PermissionEnum.Edit)]
         [HttpPost]
         public async Task<IActionResult> SetDepartment(int userId, int? departmentId)
         {
@@ -62,6 +65,7 @@ namespace CompanyManagementWeb.Controllers
             return Json(Ok());
         }
 
+        [JwtAuthorizationFilter(resource: ResourceEnum.Member, permission: PermissionEnum.Edit)]
         [HttpPost]
         public async Task<IActionResult> SetRole(int userId, int? roleId)
         {
@@ -75,6 +79,7 @@ namespace CompanyManagementWeb.Controllers
             return Json(Ok());
         }
 
+        [JwtAuthorizationFilter(resource: ResourceEnum.Member, permission: PermissionEnum.Edit)]
         [HttpPost]
         public async Task<IActionResult> Delete(int userId)
         {

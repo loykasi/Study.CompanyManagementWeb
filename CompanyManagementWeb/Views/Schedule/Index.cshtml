@@ -45,11 +45,10 @@
                 <div class="card-body">
                     <h5 class="card-title">@item.Title</h5>
                     <div>@item.Description</div>
-                    @if (!item.DepartmentName.Equals(""))
-                    {
-                        <div>@item.DepartmentName</div>
-                    }
-                    <div>@item.EmployeeName</div>
+                    <div class="d-flex justify-content-between mt-4">
+                        <span class=""><em>@item.DepartmentName</em></span>
+                        <span class=""><em>@item.EmployeeName</em></span>
+                    </div>
                 </div>
                 <div class="card-footer">
                     <a asp-action="Edit" asp-route-id="@item.Id" class="btn btn-primary">Edit</a>

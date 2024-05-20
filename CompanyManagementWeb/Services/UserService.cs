@@ -22,24 +22,34 @@ namespace CompanyManagementWeb.Services
             return userRole.RoleId == null ? false : userRole.Role.IsAdmin;
         }
 
-        public bool IsInCompany()
+        public async Task<bool> IsInCompany()
         {
-            return _dbContext.UserCompanies.Any(u => u.UserId == _httpContextAccessor.HttpContext.Session.GetInt32(SessionVariable.UserId));
+            return await _dbContext.UserCompanies.AnyAsync(u => u.UserId == _httpContextAccessor.HttpContext.Session.GetInt32(SessionVariable.UserId));
         }
 
-        public bool IsInPermission(string resource, string permission)
+        public async Task<bool> IsInPermission(string resource, string permission)
         {
             int userId = _httpContextAccessor.HttpContext.Session.GetInt32(SessionVariable.UserId).Value;
-            int roleId = _dbContext.UserCompanies.FirstOrDefault(u => u.UserId == userId).RoleId ?? 0;
-            bool isPermitted = _dbContext.RolePermissions
-                                            .Include(r => r.Resource)
-                                            .Include(r => r.Permission)
-                                            .Any(r => r.RoleId == roleId 
-                                                    && r.Resource.Name.Equals(resource) 
-                                                    && r.Permission.Name.Equals(permission)
-                                                );
+            var role = await _dbContext.UserCompanies.FirstOrDefaultAsync(u => u.UserId == userId);
+            int roleId = role.RoleId ?? 0;
+            var userPermission = _dbContext.RolePermissions
+                                                .Include(r => r.Resource)
+                                                .Include(r => r.Permission)
+                                                .FirstOrDefault(r => r.RoleId == roleId && r.Resource.Name.Equals(resource));
+            bool isPermitted = IsPermitted(userPermission.Permission.Name, permission);
 
             return isPermitted;
+        }
+
+        private bool IsPermitted(string userPermission, string permission)
+        {
+            return userPermission switch
+            {
+                null => false,
+                "View" => permission.Equals("View"),
+                "Edit" => permission.Equals("Edit") || permission.Equals("View"),
+                _ => false,
+            };
         }
 
         public bool IsLogged()

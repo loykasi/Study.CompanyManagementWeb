@@ -13,7 +13,8 @@ builder.Services.AddControllersWithViews();
 builder.Services.AddHttpContextAccessor();
 builder.Services.AddDbContext<CompanyManagementDbContext>
 (
-    options => options.UseSqlServer(builder.Configuration.GetConnectionString("CompanyManagementConnection"))
+    options => options.UseSqlServer(builder.Configuration.GetConnectionString("CompanyManagementConnection")),
+    ServiceLifetime.Transient
 );
 builder.Services.AddAuthentication(options =>
 {
