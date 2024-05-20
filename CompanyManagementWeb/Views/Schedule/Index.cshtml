@@ -4,42 +4,58 @@
     ViewData["Title"] = "Index";
 }
 
-<h1>Index</h1>
+<h2>Lịch trình kế hoạch</h2>
+
 <p>
-    <a asp-action="Create">Create New</a>
+    <a asp-action="Create">Tạo mới</a>
 </p>
 
-<form asp-action="Search">
-    <select asp-for="DepartmentId" class ="form-control">
-        <option value="">All</option>
-        @foreach (var item in Model.Departments)
-        {
-            <option value="@item.Value">@item.Text</option>
-        }
-    </select>
-    <input type="submit" value="Search" class="btn btn-danger" />
-</form>
+<div class="card">
+    <div class="col-md-12 card-body">
+        <form asp-action="Search" class="row">
+            <div class="col-md-8 form-group mb-2">
+                <select asp-for="DepartmentId" class ="form-control">
+                    <option value="">All</option>
+                    @foreach (var item in Model.Departments)
+                    {
+                        <option value="@item.Value">@item.Text</option>
+                    }
+                </select>
+            </div>
+            <div class="col-md-4 form-group">
+                <input type="submit" value="Search" class="btn btn-danger" />
+            </div>
+        </form>
+    </div>
+</div>
 
+<div class="row">
 @foreach (var group in Model.Schedules.GroupBy(s => s.FormattedDate).OrderBy(s => s.Key))
 {
-    <div class="border mt-5">
-    <p>@group.Key</p>
-    @foreach (var item in group)
-    {
-        <div class="border">
-            <div>@item.Title</div>
-            <div>@item.Description</div>
-            <div>@item.FormattedDate</div>
-            <div>@item.FormattedStartTime</div>
-            <div>@item.FormattedEndTime</div>
-            @if (!item.DepartmentName.Equals(""))
-            {
-                <div>@item.DepartmentName</div>
-            }
-            <div>@item.EmployeeName</div>
-            <a asp-action="Edit" asp-route-id="@item.Id">Edit</a>
-        </div>
-    }
+    <div class="mt-5 col-md-3">
+        <h4 class="">
+            @group.Key
+        </h4>
+        @foreach (var item in group)
+        {
+            <div class="card my-3">
+                <div class="card-header">
+                    <span>@item.FormattedStartTime - @item.FormattedEndTime</span>
+                </div>
+                <div class="card-body">
+                    <h5 class="card-title">@item.Title</h5>
+                    <div>@item.Description</div>
+                    @if (!item.DepartmentName.Equals(""))
+                    {
+                        <div>@item.DepartmentName</div>
+                    }
+                    <div>@item.EmployeeName</div>
+                </div>
+                <div class="card-footer">
+                    <a asp-action="Edit" asp-route-id="@item.Id" class="btn btn-primary">Edit</a>
+                </div>
+            </div>
+        }
     </div>
 }
-
+</div>

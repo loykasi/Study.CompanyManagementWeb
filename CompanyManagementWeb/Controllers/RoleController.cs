@@ -34,6 +34,7 @@ namespace CompanyManagementWeb.Controllers
                 {
                     Id = role.Id,
                     Name = role.Name,
+                    IsAdmin = role.IsAdmin,
                     RoleDetails = await _context.RolePermissions.Include(r => r.Resource)
                                                             .Include(r => r.Permission)
                                                             .Where(r => r.RoleId == role.Id)
@@ -74,22 +75,26 @@ namespace CompanyManagementWeb.Controllers
                 Role role = new()
                 {
                     Name = roleCreateViewModel.Name,
-                    CompanyId = GetCompanyId()
+                    CompanyId = GetCompanyId(),
+                    IsAdmin = roleCreateViewModel.IsAdmin
                 };
                 _context.Add(role);
                 await _context.SaveChangesAsync();
 
-                foreach (var item in roleCreateViewModel.RoleDetails)
+                if (!roleCreateViewModel.IsAdmin)
                 {
-                    RolePermission rolePermission = new()
+                    foreach (var item in roleCreateViewModel.RoleDetails)
                     {
-                        RoleId = role.Id,
-                        ResourceId = item.ResourceId,
-                        PermissionId = item.PermissionId
-                    };
-                    _context.Add(rolePermission);
+                        RolePermission rolePermission = new()
+                        {
+                            RoleId = role.Id,
+                            ResourceId = item.ResourceId,
+                            PermissionId = item.PermissionId
+                        };
+                        _context.Add(rolePermission);
+                    }
+                    await _context.SaveChangesAsync();
                 }
-                await _context.SaveChangesAsync();
 
                 return RedirectToAction(nameof(Index));
             }
@@ -120,21 +125,34 @@ namespace CompanyManagementWeb.Controllers
             {
                 Id = role.Id,
                 Name = role.Name,
-                RoleDetails = new List<RoleDetailCreateViewModel>()
+                IsAdmin = role.IsAdmin,
             };
 
-            var rolePermissions = await _context.RolePermissions.Where(r => r.RoleId == role.Id).ToListAsync();
-            foreach (var item in rolePermissions)
+            if (role.IsAdmin)
             {
-                var resource = _context.Resources.FirstOrDefault(r => r.Id == item.ResourceId);
-                var permission = _context.Permissions.FirstOrDefault(p => p.Id == item.PermissionId);
-                roleCreateViewModel.RoleDetails.Add(new RoleDetailCreateViewModel
+                roleCreateViewModel.RoleDetails = await _context.Resources.Select(r => new RoleDetailCreateViewModel
+                    {
+                        ResourceId = r.Id,
+                        Resource = r.Name,
+                        Permissions = new SelectList(_context.Permissions, "Id", "Name")
+                    }).ToListAsync();
+            }
+            else
+            {
+                roleCreateViewModel.RoleDetails = [];
+                var rolePermissions = await _context.RolePermissions.Where(r => r.RoleId == role.Id).ToListAsync();
+                foreach (var item in rolePermissions)
                 {
-                    ResourceId = resource.Id,
-                    Resource = resource.Name,
-                    PermissionId = permission.Id,
-                    Permissions = new SelectList(_context.Permissions, "Id", "Name", permission.Id)
-                });
+                    var resource = _context.Resources.FirstOrDefault(r => r.Id == item.ResourceId);
+                    var permission = _context.Permissions.FirstOrDefault(p => p.Id == item.PermissionId);
+                    roleCreateViewModel.RoleDetails.Add(new RoleDetailCreateViewModel
+                    {
+                        ResourceId = resource.Id,
+                        Resource = resource.Name,
+                        PermissionId = permission.Id,
+                        Permissions = new SelectList(_context.Permissions, "Id", "Name", permission.Id)
+                    });
+                }
             }
             
             return View(roleCreateViewModel);
@@ -151,15 +169,43 @@ namespace CompanyManagementWeb.Controllers
                 {
                     var role = await _context.Roles.FindAsync(roleCreateViewModel.Id);
                     role.Name = roleCreateViewModel.Name;
+                    role.IsAdmin = roleCreateViewModel.IsAdmin;
                     await _context.SaveChangesAsync();
 
                     var rolePermissions = _context.RolePermissions.Where(r => r.RoleId == roleCreateViewModel.Id);
-
-                    foreach (var item in roleCreateViewModel.RoleDetails)
+                    if (!roleCreateViewModel.IsAdmin)
                     {
-                        var detail = rolePermissions.FirstOrDefault(r => r.ResourceId == item.ResourceId);
-                        detail.PermissionId = item.PermissionId;
+                        if (rolePermissions.Any())
+                        {
+                            foreach (var item in roleCreateViewModel.RoleDetails)
+                            {
+                                var detail = rolePermissions.FirstOrDefault(r => r.ResourceId == item.ResourceId);
+                                detail.PermissionId = item.PermissionId;
+                            }
+                        }
+                        else
+                        {
+                            foreach (var item in roleCreateViewModel.RoleDetails)
+                            {
+                                RolePermission rolePermission = new()
+                                {
+                                    RoleId = role.Id,
+                                    ResourceId = item.ResourceId,
+                                    PermissionId = item.PermissionId
+                                };
+                                _context.Add(rolePermission);
+                            }
+                        }
+                    await _context.SaveChangesAsync();
                     }
+                    else
+                    {
+                        foreach (var item in rolePermissions)
+                        {
+                            _context.RolePermissions.Remove(item);
+                        }
+                    }
+
                     await _context.SaveChangesAsync();
                 }
                 catch (DbUpdateConcurrencyException)

@@ -1,34 +1,29 @@
 @model CompanyManagementWeb.ViewModels.LoginViewModel
 
 @{
-    ViewData["Title"] = "Login";
+    ViewData["Title"] = "Đăng nhập";
 }
 
-<h1>Create</h1>
-
-<h4>Post</h4>
-<hr />
-<div class="row">
-    <div class="col-md-12">
-        <form asp-action="Login">
+<div class="row justify-content-center mt-5">
+    <div class="col-md-6 card px-0">
+        <div class="card-header">
+            <h3>Đăng nhập</h3>
+        </div>
+        <form asp-action="Login" class="card-body">
             <div asp-validation-summary="ModelOnly" class="text-danger"></div>
-            <div class="form-group">
-                <label asp-for="Email" class="control-label"></label>
+            <div class="form-group mb-3">
+                <label asp-for="Email" class="control-label my-2">Email</label>
                 <input asp-for="Email" class="form-control" />
                 <span asp-validation-for="Email" class="text-danger"></span>
             </div>
-            <div class="form-group">
-                <label asp-for="Password" class="control-label"></label>
+            <div class="form-group mb-3">
+                <label asp-for="Password" class="control-label my-2">Mật khẩu</label>
                 <input asp-for="Password" type="password" class="form-control" />
                 <span asp-validation-for="Password" class="text-danger"></span>
             </div>
             <div class="form-group">
-                <input type="submit" value="Login" class="btn btn-primary" />
+                <input type="submit" value="Đăng nhập" class="btn btn-primary" />
             </div>
         </form>
     </div>
-</div>
-
-<div>
-    <a asp-action="Index">Back to List</a>
 </div>

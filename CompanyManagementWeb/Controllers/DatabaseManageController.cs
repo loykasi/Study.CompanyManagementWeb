@@ -75,9 +75,27 @@ namespace CompanyManagementWeb.Controllers
 
             _dbContext.Resources.Add(new Resource { Name = ResourceVariable.Get(ResourceEnum.Post) });
             _dbContext.Resources.Add(new Resource { Name = ResourceVariable.Get(ResourceEnum.Schedule) });
+            _dbContext.Resources.Add(new Resource { Name = ResourceVariable.Get(ResourceEnum.PostCategory) });
+            _dbContext.Resources.Add(new Resource { Name = ResourceVariable.Get(ResourceEnum.Department) });
+            _dbContext.Resources.Add(new Resource { Name = ResourceVariable.Get(ResourceEnum.Role) });
+            _dbContext.Resources.Add(new Resource { Name = ResourceVariable.Get(ResourceEnum.Member) });
 
             _dbContext.Permissions.Add(new Permission { Name = PermissionVariable.Get(PermissionEnum.Edit) });
             _dbContext.Permissions.Add(new Permission { Name = PermissionVariable.Get(PermissionEnum.View) });
+
+            // var pers = await _dbContext.Permissions.ToListAsync();
+            // foreach (var item in pers)
+            // {
+            //     _dbContext.Permissions.Remove(item);
+            // }
+
+            // var res = await _dbContext.Resources.ToListAsync();
+            // foreach (var item in res)
+            // {
+            //     _dbContext.Resources.Remove(item);
+            // }
+            
+            
             await _dbContext.SaveChangesAsync();
 
             StatusMessage = "Vừa seed Database";

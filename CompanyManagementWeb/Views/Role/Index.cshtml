@@ -4,41 +4,56 @@
     ViewData["Title"] = "Index";
 }
 
-<h1>Index</h1>
+<h1>Vai trò</h1>
 
 <p>
-    <a asp-action="Create">Create New</a>
+    <a asp-action="Create">Tạo mới</a>
 </p>
 @foreach (var item in Model.Roles)
 {
-<div class="border mb-3">
-    @item.Name
-    <table class="table">
-        <thead>
-            <tr>
-                <th>
-                    Nội dung
-                </th>
-                <th>
-                    Quyền hạn
-                </th>
-            </tr>
-        </thead>
-        <tbody>
-    @foreach (var detail in item.RoleDetails)
-    {
-        <tr>
-            <td>
-                @detail.Resource
-            </td>
-            <td>
-                @detail.Permission
-            </td>
-        </tr>
-    }
-        </tbody>
-    </table>
-    <a asp-action="Edit" asp-route-id="@item.Id">Edit</a>
-    <a asp-action="Delete" asp-route-id="@item.Id">Delete</a>
+<div class="card mb-3">
+    <div class="card-header">
+        @item.Name
+    </div>
+    <div class="card-body">
+        @if (@item.IsAdmin)
+        {
+            <div>
+                Quyền hạn - Quản trị viên
+            </div>
+        }
+        else
+        {
+            <table class="table">
+                <thead>
+                    <tr>
+                        <th>
+                            Nội dung
+                        </th>
+                        <th>
+                            Quyền hạn
+                        </th>
+                    </tr>
+                </thead>
+                <tbody>
+            @foreach (var detail in item.RoleDetails)
+            {
+                <tr>
+                    <td>
+                        @detail.Resource
+                    </td>
+                    <td>
+                        @detail.Permission
+                    </td>
+                </tr>
+            }
+                </tbody>
+            </table>
+        }
+    </div>
+    <div class="card-footer">
+        <a asp-action="Edit" asp-route-id="@item.Id" class="btn btn-primary">Edit</a>
+        <a asp-action="Delete" asp-route-id="@item.Id" class="btn btn-danger">Delete</a>
+    </div>
 </div>
 }

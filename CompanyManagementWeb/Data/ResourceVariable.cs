@@ -4,7 +4,11 @@ namespace CompanyManagementWeb.Data
     {
         None,
         Post,
-        Schedule
+        Schedule,
+        PostCategory,
+        Department,
+        Role,
+        Member
     }
 
     public class ResourceVariable
@@ -16,6 +20,10 @@ namespace CompanyManagementWeb.Data
                 ResourceEnum.None => "None",
                 ResourceEnum.Post => "Post",
                 ResourceEnum.Schedule => "Schedule",
+                ResourceEnum.PostCategory => "PostCategory",
+                ResourceEnum.Department => "Department",
+                ResourceEnum.Role => "Role",
+                ResourceEnum.Member => "Member",
                 _ => string.Empty,
             };
         }

@@ -6,8 +6,6 @@ namespace CompanyManagementWeb.Services
     public interface ITokenService
     {
         public Token GenerateToken(User user);
-        // public string GenerateAccessToken();
-        // public string GenerateRefreshToken();
         public bool ValidateAccessToken(string token);
         public bool TryGetPrincipalFromToken(string token, out ClaimsPrincipal? claims);
 

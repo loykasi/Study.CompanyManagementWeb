@@ -25,11 +25,17 @@ namespace CompanyManagementWeb.Controllers
         [HttpPost]
         public IActionResult Create(CompanyCreateViewModel companyCreateViewModel)
         {
+            if (!ModelState.IsValid)
+            {
+                return View(companyCreateViewModel);
+            }
             int userId = HttpContext.Session.GetInt32("userId").Value;
 
             Company company = new()
             {
                 Name = companyCreateViewModel.Name,
+                Address = companyCreateViewModel.Address,
+                CreatedDate = DateTime.Now,
             };
             _context.Add(company);
             _context.SaveChanges();

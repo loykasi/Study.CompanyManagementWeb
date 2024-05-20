@@ -10,6 +10,7 @@ var builder = WebApplication.CreateBuilder(args);
 
 // Add services to the container.
 builder.Services.AddControllersWithViews();
+builder.Services.AddHttpContextAccessor();
 builder.Services.AddDbContext<CompanyManagementDbContext>
 (
     options => options.UseSqlServer(builder.Configuration.GetConnectionString("CompanyManagementConnection"))
@@ -38,6 +39,7 @@ builder.Services.AddSession(options =>
     options.Cookie.HttpOnly = true;
 });
 
+builder.Services.AddScoped<IUserService, UserService>();
 builder.Services.AddScoped<ITokenService, TokenService>();
 
 var app = builder.Build();

@@ -45,7 +45,8 @@ namespace CompanyManagementWeb.Controllers
                 User user = new()
                 {
                     Name = registerViewModel.Name,
-                    Email = registerViewModel.Email
+                    Email = registerViewModel.Email,
+                    PhoneNumber = registerViewModel.PhoneNumber,
                 };
                 user.PasswordHash = passwordHasher.HashPassword(user, registerViewModel.Password);
 
@@ -120,7 +121,7 @@ namespace CompanyManagementWeb.Controllers
                 user.RefreshToken = null;
                 _context.SaveChanges();
             }
-            return RedirectToAction(nameof(Index));
+            return RedirectToAction("Index", "Home");
         }
  
         private void SetJWTCookie(string token)

@@ -4,42 +4,40 @@
     ViewData["Title"] = "Edit";
 }
 
-<h1>Edit</h1>
-
-<h4>Schedule</h4>
+<h4>Lịch trình</h4>
 <hr />
 <div class="row">
     <div class="col-md-4">
         <form asp-action="Edit">
             <div asp-validation-summary="ModelOnly" class="text-danger"></div>
             <input type="hidden" asp-for="Id" />
-            <div class="form-group">
-                <label asp-for="Title" class="control-label"></label>
+            <div class="form-group mb-2">
+                <label asp-for="Title" class="control-label mb-2">Tiêu đề</label>
                 <input asp-for="Title" class="form-control" />
                 <span asp-validation-for="Title" class="text-danger"></span>
             </div>
-            <div class="form-group">
-                <label asp-for="Description" class="control-label"></label>
+            <div class="form-group mb-2">
+                <label asp-for="Description" class="control-label mb-2">Mô tả</label>
                 <input asp-for="Description" class="form-control" />
                 <span asp-validation-for="Description" class="text-danger"></span>
             </div>
-            <div class="form-group">
-                <label asp-for="Date" class="control-label"></label>
+            <div class="form-group mb-2">
+                <label asp-for="Date" class="control-label mb-2">Ngày</label>
                 <input asp-for="Date" type="date" class="form-control" />
                 <span asp-validation-for="Date" class="text-danger"></span>
             </div>
-            <div class="form-group">
-                <label asp-for="StartTime" class="control-label"></label>
+            <div class="form-group mb-2">
+                <label asp-for="StartTime" class="control-label mb-2">Thời gian bắt đầu</label>
                 <input asp-for="StartTime" type="time" class="form-control" />
                 <span asp-validation-for="StartTime" class="text-danger"></span>
             </div>
-            <div class="form-group">
-                <label asp-for="EndTime" class="control-label"></label>
+            <div class="form-group mb-2">
+                <label asp-for="EndTime" class="control-label mb-2">Thời gian kết thúc</label>
                 <input asp-for="EndTime" type="time" class="form-control" />
                 <span asp-validation-for="EndTime" class="text-danger"></span>
             </div>
-            <div class="form-group">
-                <label asp-for="DepartmentId" class="control-label"></label>
+            <div class="form-group mb-2">
+                <label asp-for="DepartmentId" class="control-label mb-2">Phòng ban</label>
                 <select asp-for="DepartmentId" class ="form-control" asp-items="Model.Departments">
                     <option value="">Select department</option>
                 </select>
