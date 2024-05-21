@@ -36,6 +36,10 @@ namespace CompanyManagementWeb.Services
                                                 .Include(r => r.Resource)
                                                 .Include(r => r.Permission)
                                                 .FirstOrDefault(r => r.RoleId == roleId && r.Resource.Name.Equals(resource));
+            if (userPermission == null)
+            {
+                return false;
+            }
             bool isPermitted = IsPermitted(userPermission.Permission.Name, permission);
 
             return isPermitted;
@@ -55,6 +59,34 @@ namespace CompanyManagementWeb.Services
         public bool IsLogged()
         {
             return _httpContextAccessor.HttpContext.Session.GetInt32(SessionVariable.UserId) != null;
+        }
+
+        public async Task<bool> HasPermission()
+        {
+            int userId = _httpContextAccessor.HttpContext.Session.GetInt32(SessionVariable.UserId).Value;
+            var userCompany = await _dbContext.UserCompanies.FirstOrDefaultAsync(u => u.UserId == userId);
+
+            if (userCompany.RoleId == null)
+            {
+                return false;
+            }
+
+            var role = await _dbContext.Roles.FindAsync(userCompany.RoleId);
+            if (role == null)
+            {
+                return false;
+            }
+            if (role.IsAdmin)
+            {
+                return true;
+            }
+
+            if (userCompany.DepartmentId == null)
+            {
+                return false;
+            }
+            
+            return true;
         }
     }
 }

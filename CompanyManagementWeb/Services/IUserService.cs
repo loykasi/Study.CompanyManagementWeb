@@ -6,5 +6,6 @@ namespace CompanyManagementWeb.Services
         public Task<bool> IsInPermission(string resource, string permission);
         public Task<bool> IsInCompany();
         public Task<bool> IsAdmin();
+        public Task<bool> HasPermission();
     }
 }

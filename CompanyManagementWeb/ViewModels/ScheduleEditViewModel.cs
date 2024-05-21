@@ -16,6 +16,9 @@ namespace CompanyManagementWeb.ViewModels
         public string? Description { get; set; }
 
         [Required]
+        public string? Content { get; set; }
+
+        [Required]
         public DateTime? Date { get; set; }
 
         [Required]

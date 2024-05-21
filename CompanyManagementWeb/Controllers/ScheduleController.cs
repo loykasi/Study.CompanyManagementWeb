@@ -11,10 +11,12 @@ namespace CompanyManagementWeb.Controllers
     public class ScheduleController : Controller
     {
         private readonly CompanyManagementDbContext _context;
+        private readonly ILogger<ScheduleController> _logger;
 
-        public ScheduleController(CompanyManagementDbContext context)
+        public ScheduleController(CompanyManagementDbContext context, ILogger<ScheduleController> logger)
         {
             _context = context;
+            _logger = logger;
         }
 
         // GET: Schedule
@@ -25,7 +27,10 @@ namespace CompanyManagementWeb.Controllers
                 Schedules = new List<ScheduleViewModel>()
             };
 
-            var schedules = _context.Schedules.Include(s => s.Employee).Include(s => s.Department).Where(d => d.CompanyId == GetCompanyId());
+            var schedules = _context.Schedules.Where(d => d.StartDate.Value.Date >= DateTime.Now.Date && d.CompanyId == GetCompanyId());
+            schedules = schedules.Include(s => s.Employee).Include(s => s.Department);
+
+            // var schedules = _context.Schedules.Include(s => s.Employee).Include(s => s.Department).Where(d => d.CompanyId == GetCompanyId());
             foreach (var item in schedules)
             {
                 scheduleIndexViewModel.Schedules.Add(new ScheduleViewModel
@@ -53,12 +58,30 @@ namespace CompanyManagementWeb.Controllers
         public IActionResult Search(ScheduleIndexViewModel scheduleIndexViewModel)
         {
             IQueryable<Schedule> schedules = _context.Schedules.Where(d => d.CompanyId == GetCompanyId());
+            bool hasFromDate = false;
+            bool hasToDate = false;
 
             if (scheduleIndexViewModel.DepartmentId != null)
             {
                 schedules = schedules.Where(s => s.DepartmentId == scheduleIndexViewModel.DepartmentId);
             }
+            if (scheduleIndexViewModel.FromDate != null)
+            {
+                schedules = schedules.Where(p => p.StartDate >= scheduleIndexViewModel.FromDate);
+                hasFromDate = true;
+            }
+            if (scheduleIndexViewModel.ToDate != null)
+            {
+                schedules = schedules.Where(p => p.StartDate <= scheduleIndexViewModel.ToDate);
+                hasToDate = true;
+            }
+            if (!hasFromDate && !hasToDate)
+            {
+                schedules = schedules.Where(p => p.StartDate >= DateTime.Now.Date);
+            }
             schedules = schedules.Include(s => s.Employee).Include(s => s.Department);
+
+            _logger.LogInformation("(SCHEDULE SEARCH) {hasFromDate} | {hasToDate}", hasFromDate, hasToDate);
 
             scheduleIndexViewModel.Schedules = new List<ScheduleViewModel>();
             foreach (var item in schedules)
@@ -75,13 +98,90 @@ namespace CompanyManagementWeb.Controllers
                         EmployeeName = item.Employee?.Name ?? "",
                     });
             }
+            return PartialView("ScheduleListPartial", scheduleIndexViewModel);
+        }
 
-            scheduleIndexViewModel.Departments = _context.Departments.Select(d => new SelectListItem
-                                                                            {
-                                                                                Value = d.Id.ToString(),
-                                                                                Text = d.Name
-                                                                            });
-            return View("Index", scheduleIndexViewModel);
+        public IActionResult GetOldSchedules()
+        {
+            ScheduleIndexViewModel scheduleIndexViewModel = new()
+            { 
+                Schedules = new List<ScheduleViewModel>()
+            };
+
+            IQueryable<Schedule> schedules = _context.Schedules.Where(d => d.StartDate.Value.Date < DateTime.Now.Date && d.CompanyId == GetCompanyId()).OrderByDescending(s => s.StartDate.Value.Date);
+            schedules = schedules.Include(s => s.Employee).Include(s => s.Department);
+
+            foreach (var item in schedules)
+            {
+                scheduleIndexViewModel.Schedules.Add(new ScheduleViewModel
+                    {
+                        Id = item.Id,
+                        Title = item.Title,
+                        Description = item.Description,
+                        Date = item.StartDate,
+                        StartTime = item.StartDate,
+                        EndTime = item.EndDate,
+                        DepartmentName = item.Department?.Name ?? "",
+                        EmployeeName = item.Employee?.Name ?? "",
+                    });
+            }
+            return PartialView("ScheduleListPartial", scheduleIndexViewModel);
+        }
+
+        public IActionResult GetCurrent()
+        {
+            ScheduleIndexViewModel scheduleIndexViewModel = new()
+            { 
+                Schedules = new List<ScheduleViewModel>()
+            };
+
+            IQueryable<Schedule> schedules = _context.Schedules.Where(d => d.StartDate.Value.Date >= DateTime.Now.Date && d.CompanyId == GetCompanyId()).OrderBy(s => s.StartDate.Value.Date);
+            schedules = schedules.Include(s => s.Employee).Include(s => s.Department);
+
+            foreach (var item in schedules)
+            {
+                scheduleIndexViewModel.Schedules.Add(new ScheduleViewModel
+                    {
+                        Id = item.Id,
+                        Title = item.Title,
+                        Description = item.Description,
+                        Date = item.StartDate,
+                        StartTime = item.StartDate,
+                        EndTime = item.EndDate,
+                        DepartmentName = item.Department?.Name ?? "",
+                        EmployeeName = item.Employee?.Name ?? "",
+                    });
+            }
+            return PartialView("ScheduleListPartial", scheduleIndexViewModel);
+        }
+
+        // DETAIL: Schedule/Detail/5
+        public async Task<IActionResult> Details(int? id)
+        {
+            if (id == null)
+            {
+                return NotFound();
+            }
+
+            var schedule = await _context.Schedules.Include(s => s.Department).Include(s => s.Employee).FirstOrDefaultAsync(s => s.Id == id);
+            if (schedule == null)
+            {
+                return NotFound();
+            }
+            
+            ScheduleViewModel scheduleViewModel = new()
+            {
+                Id = schedule.Id,
+                Title = schedule.Title,
+                Description = schedule.Description,
+                Content = schedule.Content,
+                Date = schedule.StartDate,
+                StartTime = schedule.StartDate,
+                EndTime = schedule.EndDate,
+                DepartmentName = schedule.Department?.Name ?? "",
+                EmployeeName = schedule.Employee?.Name ?? "",
+            };
+            return View(scheduleViewModel);
         }
 
         // GET: Schedule/Create
@@ -108,6 +208,7 @@ namespace CompanyManagementWeb.Controllers
                 {
                     Title = scheduleViewModel.Title,
                     Description = scheduleViewModel.Description,
+                    Content = scheduleViewModel.Content,
                     StartDate = new DateTime(scheduleViewModel.Date.Value.Year, scheduleViewModel.Date.Value.Month, scheduleViewModel.Date.Value.Day,
                                             scheduleViewModel.StartTime.Value.Hour, scheduleViewModel.StartTime.Value.Minute, scheduleViewModel.StartTime.Value.Second),
                     EndDate = new DateTime(scheduleViewModel.Date.Value.Year, scheduleViewModel.Date.Value.Month, scheduleViewModel.Date.Value.Day,
@@ -144,6 +245,7 @@ namespace CompanyManagementWeb.Controllers
                 Id = schedule.Id,
                 Title = schedule.Title,
                 Description = schedule.Description,
+                Content = schedule.Content,
                 Date = schedule.StartDate,
                 StartTime = schedule.StartDate,
                 EndTime = schedule.EndDate,
@@ -169,6 +271,7 @@ namespace CompanyManagementWeb.Controllers
 
                     schedule.Title = scheduleViewModel.Title;
                     schedule.Description = scheduleViewModel.Description;
+                    schedule.Content = scheduleViewModel.Content;
                     schedule.StartDate = new DateTime(scheduleViewModel.Date.Value.Year, scheduleViewModel.Date.Value.Month, scheduleViewModel.Date.Value.Day,
                                             scheduleViewModel.StartTime.Value.Hour, scheduleViewModel.StartTime.Value.Minute, scheduleViewModel.StartTime.Value.Second);
                     schedule.EndDate = new DateTime(scheduleViewModel.Date.Value.Year, scheduleViewModel.Date.Value.Month, scheduleViewModel.Date.Value.Day,

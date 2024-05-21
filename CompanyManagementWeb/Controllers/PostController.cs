@@ -60,7 +60,7 @@ namespace CompanyManagementWeb.Controllers
         [JwtAuthorizationFilter(resource: ResourceEnum.Post, permission: PermissionEnum.View)]
         public async Task<IActionResult> Search(PostIndexViewModel postIndexViewModel)
         {
-            IQueryable<Post> posts = _context.Posts;
+            IQueryable<Post> posts = _context.Posts.Where(d => d.PostCategory.CompanyId == GetCompanyId());
 
             if (!postIndexViewModel.SearchValue.IsNullOrEmpty())
             {
@@ -96,12 +96,7 @@ namespace CompanyManagementWeb.Controllers
                     });
             }
 
-            postIndexViewModel.Departments = _context.Departments.Select(d => new SelectListItem
-                                                                            {
-                                                                                Value = d.Id.ToString(),
-                                                                                Text = d.Name
-                                                                            });
-            return View("Index", postIndexViewModel);
+            return PartialView("PostListPartial", postIndexViewModel);
         }
 
         // GET: UploadPost/Details/5

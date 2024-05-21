@@ -18,6 +18,11 @@ namespace CompanyManagementWeb.Controllers
             return View();
         }
 
+        public IActionResult Warning()
+        {
+            return View();
+        }
+
         public IActionResult Privacy()
         {
             return View();

@@ -1,4 +1,3 @@
-using CompanyManagementWeb.Models;
 using Microsoft.AspNetCore.Mvc.Rendering;
 
 namespace CompanyManagementWeb.ViewModels
@@ -9,5 +8,7 @@ namespace CompanyManagementWeb.ViewModels
         public IEnumerable<SelectListItem> Departments { get; set; }
 
         public int? DepartmentId { get; set; }
+        public DateTime? FromDate { get; set; }
+        public DateTime? ToDate { get; set; }
     }
 }

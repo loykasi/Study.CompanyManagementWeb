@@ -13,7 +13,7 @@
 
 <div class="card">
     <div class="col-md-12 card-body">
-        <form asp-action="Search" class="row">
+        <form id="searchForm" asp-action="Search" class="row">
             <div class="col-md-3 form-group mb-2">
                 <label asp-for="SearchValue" class="control-label mb-2">Tìm kiếm</label>
                 <input asp-for="SearchValue" class="form-control" />
@@ -43,24 +43,30 @@
     </div>
 </div>
 
-@foreach (var item in Model.Posts)
-{
-    <div href="#" class="card mt-5">
-        <div class="card-body">
-            <h4 class="card-title">@item.Title</h4>
-            <div>@item.Description</div>
-            
-            <div class="d-flex justify-content-between mt-4">
-                <span class=""><em>@item.CategoryName</em></span>
-                <span class=""><em>@item.DepartmentName - @item.CreatedDate.Value.ToString("dd/MM/yyyy hh:mm tt")</em></span>
-            </div>
-        </div>
-        <div class="card-footer">
-            <a asp-action="Details" asp-route-id="@item.Id" class="btn btn-primary">Details</a>
-            @if (await userService.IsInPermission("Post", "Edit"))
-            {
-                <a asp-action="Edit" asp-route-id="@item.Id" class="btn btn-danger">Edit</a>
-            }
-        </div>
-    </div>
+<div id="postList">
+    <partial name="PostListPartial" model="Model" />
+</div>
+
+@section Scripts {
+    <script>
+        $("#searchForm").submit(function(e) {
+            e.preventDefault();
+            console.log("search");
+
+            var form = $(this);
+            var actionUrl = form.attr('action');
+
+            $.ajax({
+                type: 'GET',
+                url: actionUrl,
+                data: form.serialize(),
+                success: function (response) {
+                    $('#postList').html(response);
+                },
+                error: function (response, status, error) {
+                    console.log(status);
+                },
+            });
+        });
+    </script>
 }

@@ -3,7 +3,7 @@
 @{
     ViewData["Title"] = "Create";
 }
-
+<link rel="stylesheet" href="~/lib/summernote/summernote-lite.min.css" />
 <h4>Lịch trình mới</h4>
 <hr />
 <div class="row">
@@ -19,6 +19,11 @@
                 <label asp-for="Description" class="control-label mb-2">Mô tả ngắn</label>
                 <input asp-for="Description" class="form-control" />
                 <span asp-validation-for="Description" class="text-danger"></span>
+            </div>
+            <div class="form-group mb-2">
+                <label asp-for="Content" class="control-label mb-2">Nội dung</label>
+                <textarea asp-for="Content" class="form-control"></textarea>
+                <span asp-validation-for="Content" class="text-danger"></span>
             </div>
             <div class="form-group mb-2">
                 <label asp-for="Date" class="control-label mb-2">Ngày</label>
@@ -53,5 +58,11 @@
 </div>
 
 @section Scripts {
+    <script src="~/lib/summernote/summernote-lite.min.js"></script>
+    <script>
+        $(document).ready(function() {
+            $('#Content').summernote();
+        });
+    </script>
     @{await Html.RenderPartialAsync("_ValidationScriptsPartial");}
 }

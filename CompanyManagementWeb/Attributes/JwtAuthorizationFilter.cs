@@ -50,7 +50,7 @@ namespace CompanyManagementWeb.Attributes
 
             if (!IsPermitted(context, userId.Value))
             {
-                RedirectToLogin(context);
+                RedirectToWarning(context);
                 return;
             }
         }
@@ -94,6 +94,10 @@ namespace CompanyManagementWeb.Attributes
                                                 .Include(r => r.Resource)
                                                 .Include(r => r.Permission)
                                                 .FirstOrDefault(r => r.RoleId == roleId && r.Resource.Name.Equals(GetResourceName()));
+                    if (userPermission == null)
+                    {
+                        return false;
+                    }
                     isPermitted = IsInPermission(userPermission.Permission.Name);
                 }
 
@@ -112,11 +116,6 @@ namespace CompanyManagementWeb.Attributes
             return true;
         }
 
-        private void RedirectToLogin(AuthorizationFilterContext context)
-        {
-            context.Result = new RedirectToActionResult("Login", "Identity", null);
-        }
-
         private bool IsInPermission(string userPermission)
         {
             return userPermission switch
@@ -126,6 +125,16 @@ namespace CompanyManagementWeb.Attributes
                 "Edit" => userPermission.Equals(GetPermissionName()) || Permission == PermissionEnum.View,
                 _ => false,
             };
+        }
+
+        private void RedirectToLogin(AuthorizationFilterContext context)
+        {
+            context.Result = new RedirectToActionResult("Login", "Identity", null);
+        }
+
+        private void RedirectToWarning(AuthorizationFilterContext context)
+        {
+            context.Result = new RedirectToActionResult("Warning", "Home", null);
         }
 
         private string? GetResourceName() => ResourceVariable.Get(Resource);
