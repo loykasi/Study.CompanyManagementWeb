@@ -27,5 +27,20 @@ namespace CompanyManagementWeb.Data
                 _ => string.Empty,
             };
         }
+
+        public static string GetLocalizedName(string resource)
+        {
+            return resource switch
+            {
+                "None" => "None",
+                "Post" => "Bài đăng",
+                "Schedule" => "Lịch trình",
+                "PostCategory" => "Danh mục",
+                "Department" => "Phòng ban",
+                "Role" => "Vai trò",
+                "Member" => "Thành viên",
+                _ => string.Empty,
+            };
+        }
     }  
 }

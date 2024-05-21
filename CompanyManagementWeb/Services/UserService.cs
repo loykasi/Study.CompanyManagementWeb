@@ -30,8 +30,19 @@ namespace CompanyManagementWeb.Services
         public async Task<bool> IsInPermission(string resource, string permission)
         {
             int userId = _httpContextAccessor.HttpContext.Session.GetInt32(SessionVariable.UserId).Value;
-            var role = await _dbContext.UserCompanies.FirstOrDefaultAsync(u => u.UserId == userId);
-            int roleId = role.RoleId ?? 0;
+            var userCompany = await _dbContext.UserCompanies.FirstOrDefaultAsync(u => u.UserId == userId);
+            int roleId = userCompany.RoleId ?? 0;
+            
+            var role = await _dbContext.Roles.FindAsync(userCompany.RoleId);
+            if (role == null)
+            {
+                return false;
+            }
+            if (role.IsAdmin)
+            {
+                return true;
+            }
+
             var userPermission = _dbContext.RolePermissions
                                                 .Include(r => r.Resource)
                                                 .Include(r => r.Permission)

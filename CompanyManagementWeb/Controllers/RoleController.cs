@@ -40,8 +40,8 @@ namespace CompanyManagementWeb.Controllers
                                                             .Where(r => r.RoleId == role.Id)
                                                             .Select(r => new RoleDetailViewModel
                                                             {
-                                                                Resource = r.Resource.Name,
-                                                                Permission = r.Permission.Name
+                                                                Resource = ResourceVariable.GetLocalizedName(r.Resource.Name),
+                                                                Permission = PermissionVariable.GetLocalizedName(r.Permission.Name)
                                                             }).ToListAsync()
                 };
                 roleIndexViewModel.Roles.Add(roleViewModel);
@@ -58,8 +58,16 @@ namespace CompanyManagementWeb.Controllers
                 RoleDetails = await _context.Resources.Select(r => new RoleDetailCreateViewModel
                 {
                     ResourceId = r.Id,
-                    Resource = r.Name,
-                    Permissions = new SelectList(_context.Permissions, "Id", "Name")
+                    Resource = ResourceVariable.GetLocalizedName(r.Name),
+                    Permissions = new SelectList(
+                                        _context.Permissions.Select(p => new
+                                            {
+                                                Id = p.Id,
+                                                Name = PermissionVariable.GetLocalizedName(p.Name)
+                                            }).ToList(), 
+                                        "Id", 
+                                        "Name"
+                                    )
                 }).ToListAsync()
             };
             return View(roleCreateViewModel);
@@ -99,7 +107,15 @@ namespace CompanyManagementWeb.Controllers
                 {
                     ResourceId = r.Id,
                     Resource = r.Name,
-                    Permissions = new SelectList(_context.Permissions, "Id", "Name")
+                    Permissions = new SelectList(
+                                        _context.Permissions.Select(p => new
+                                            {
+                                                Id = p.Id,
+                                                Name = PermissionVariable.GetLocalizedName(p.Name)
+                                            }).ToList(), 
+                                        "Id", 
+                                        "Name"
+                                    )
                 }).ToListAsync();
             return View(roleCreateViewModel);
         }
@@ -130,8 +146,16 @@ namespace CompanyManagementWeb.Controllers
                 roleCreateViewModel.RoleDetails = await _context.Resources.Select(r => new RoleDetailCreateViewModel
                     {
                         ResourceId = r.Id,
-                        Resource = r.Name,
-                        Permissions = new SelectList(_context.Permissions, "Id", "Name")
+                        Resource = ResourceVariable.GetLocalizedName(r.Name),
+                        Permissions = new SelectList(
+                                        _context.Permissions.Select(p => new
+                                            {
+                                                Id = p.Id,
+                                                Name = PermissionVariable.GetLocalizedName(p.Name)
+                                            }).ToList(), 
+                                        "Id", 
+                                        "Name"
+                                    )
                     }).ToListAsync();
             }
             else
@@ -145,9 +169,17 @@ namespace CompanyManagementWeb.Controllers
                     roleCreateViewModel.RoleDetails.Add(new RoleDetailCreateViewModel
                     {
                         ResourceId = resource.Id,
-                        Resource = resource.Name,
+                        Resource = ResourceVariable.GetLocalizedName(resource.Name),
                         PermissionId = permission.Id,
-                        Permissions = new SelectList(_context.Permissions, "Id", "Name", permission.Id)
+                        Permissions = new SelectList(
+                                        _context.Permissions.Select(p => new
+                                            {
+                                                Id = p.Id,
+                                                Name = PermissionVariable.GetLocalizedName(p.Name)
+                                            }).ToList(), 
+                                        "Id", 
+                                        "Name"
+                                    )
                     });
                 }
             }

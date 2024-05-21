@@ -13,12 +13,12 @@
                 <span class=""><em>@(string.IsNullOrEmpty(item.DepartmentName) ? "" : item.DepartmentName + " -") @item.CreatedDate.Value.ToString("dd/MM/yyyy hh:mm tt")</em></span>
             </div>
         </div>
-        <div class="card-footer">
-            <a asp-action="Details" asp-route-id="@item.Id" class="btn btn-primary">Details</a>
-            @if (await userService.IsInPermission("Post", "Edit"))
-            {
-                <a asp-action="Edit" asp-route-id="@item.Id" class="btn btn-danger">Edit</a>
-            }
-        </div>
+        @if (await userService.IsInPermission("Post", "Edit"))
+        {
+            <div class="card-footer">        
+                <a asp-action="Edit" asp-route-id="@item.Id" class="btn btn-danger">Chỉnh sửa</a>
+                <a asp-action="Delete" asp-route-id="@item.Id" class="btn btn-danger">Xóa</a>
+            </div>
+        }
     </div>
 }

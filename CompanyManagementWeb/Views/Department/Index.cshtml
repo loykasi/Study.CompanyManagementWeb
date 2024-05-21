@@ -1,14 +1,17 @@
 ﻿@model IEnumerable<CompanyManagementWeb.Models.Department>
+@inject CompanyManagementWeb.Services.IUserService userService
 
 @{
     ViewData["Title"] = "Index";
 }
 
-<h2>Phòng ban</h2>
-
-<p>
-    <a asp-action="Create">Tạo mới</a>
-</p>
+<div class="d-flex justify-content-between my-3">
+    <h2 class="m-0 align-bottom">Phòng ban</h2>
+    @if (await userService.IsInPermission("Department", "Edit"))
+    {
+        <a class="m-0 align-bottom btn btn-secondary" asp-action="Create">Tạo phòng ban</a>
+    }
+</div>
 <table class="table">
     <thead>
         <tr>
@@ -24,9 +27,12 @@
             <td class="align-middle">
                 @Html.DisplayFor(modelItem => item.Name)
             </td>
-            <td>
-                <a asp-action="Edit" asp-route-id="@item.Id" class="btn btn-primary">Edit</a>
-                <a asp-action="Delete" asp-route-id="@item.Id" class="btn btn-danger">Delete</a>
+            <td class="">
+                @if (await userService.IsInPermission("Department", "Edit"))
+                {
+                    <a asp-action="Edit" asp-route-id="@item.Id" class="btn btn-primary mx-2 float-end">Chỉnh sửa</a>
+                    <a asp-action="Delete" asp-route-id="@item.Id" class="btn btn-danger mx-2 float-end">Xóa</a>
+                }
             </td>
         </tr>
 }

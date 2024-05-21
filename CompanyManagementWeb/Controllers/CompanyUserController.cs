@@ -103,17 +103,17 @@ namespace CompanyManagementWeb.Controllers
                                                     DepartmentId = u.DepartmentId,
                                                     RoleId = u.RoleId,
                                                     Departments = new SelectList(
-                                                                        _context.Departments.Where(d => d.CompanyId == GetCompanyId()).ToList(),
-                                                                        "Id",
-                                                                        "Name",
-                                                                        u.DepartmentId ?? 0
-                                                                    ),
+                                                            _context.Departments.Where(d => d.CompanyId == GetCompanyId()).ToList(),
+                                                            "Id",
+                                                            "Name",
+                                                            u.DepartmentId ?? 0
+                                                        ),
                                                     Roles = new SelectList(
-                                                                    _context.Roles.Where(r => r.CompanyId == GetCompanyId()).ToList(),
-                                                                    "Id",
-                                                                    "Name",
-                                                                    u.RoleId ?? 0
-                                                                ),
+                                                            _context.Roles.Where(r => r.CompanyId == GetCompanyId()).ToList(),
+                                                            "Id",
+                                                            "Name",
+                                                            u.RoleId ?? 0
+                                                        ),
                                                 }).ToListAsync()
             };
 

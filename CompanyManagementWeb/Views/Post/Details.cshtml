@@ -1,9 +1,17 @@
 ﻿@model CompanyManagementWeb.ViewModels.PostViewModel
+@inject CompanyManagementWeb.Services.IUserService userService
 
 @{
     ViewData["Title"] = @Model.Title;
 }
-
+<div>
+    <a asp-action="Index">Trở về</a>
+    @if (await userService.IsInPermission("Post", "Edit"))
+    {
+        <span>| <a asp-action="Edit" asp-route-id="@Model?.Id">Chỉnh sửa</a></span>
+        <span>| <a asp-action="Delete" asp-route-id="@Model?.Id">Xóa</a></span>
+    }
+</div>
 <div class="d-flex justify-content-between mt-4">
     <span class=""><em>@Model.CategoryName</em></span>
     <span class=""><em>@Model.DepartmentName - @Model.CreatedDate.Value.ToString("dd/MM/yyyy hh:mm tt")</em></span>
@@ -11,10 +19,4 @@
 <h1>@Model.Title</h1>
 <h5>@Model.Description</h5>
 <hr />
-
 <div>@Html.Raw(Model.Content)</div>
-
-<div>
-    <a asp-action="Edit" asp-route-id="@Model?.Id">Edit</a> |
-    <a asp-action="Index">Back to List</a>
-</div>

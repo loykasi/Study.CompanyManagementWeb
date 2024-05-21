@@ -1,19 +1,22 @@
 ﻿@model CompanyManagementWeb.ViewModels.RoleIndexViewModel
+@inject CompanyManagementWeb.Services.IUserService userService
 
 @{
     ViewData["Title"] = "Index";
 }
 
-<h1>Vai trò</h1>
-
-<p>
-    <a asp-action="Create">Tạo mới</a>
-</p>
+<div class="d-flex justify-content-between my-3">
+    <h2 class="m-0 align-bottom">Vai trò</h2>
+    @if (await userService.IsInPermission("Department", "Edit"))
+    {
+        <a class="m-0 align-bottom btn btn-secondary" asp-action="Create">Tạo vai trò</a>
+    }
+</div>
 @foreach (var item in Model.Roles)
 {
 <div class="card mb-3">
     <div class="card-header">
-        @item.Name
+        <h5 class="card-title">@item.Name</h5>
     </div>
     <div class="card-body">
         @if (@item.IsAdmin)
@@ -52,8 +55,11 @@
         }
     </div>
     <div class="card-footer">
-        <a asp-action="Edit" asp-route-id="@item.Id" class="btn btn-primary">Edit</a>
-        <a asp-action="Delete" asp-route-id="@item.Id" class="btn btn-danger">Delete</a>
+        @if (await userService.IsInPermission("Role", "Edit"))
+        {
+            <a asp-action="Edit" asp-route-id="@item.Id" class="btn btn-primary">Chỉnh sửa</a>
+            <a asp-action="Delete" asp-route-id="@item.Id" class="btn btn-danger">Xóa</a>
+        }
     </div>
 </div>
 }

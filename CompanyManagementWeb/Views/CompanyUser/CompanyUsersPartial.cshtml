@@ -16,7 +16,8 @@
             </select>
         </td>
         <td>
-            <a onclick="deleteUser(@Model.CompanyUsers[i].Id)" class="btn btn-danger">Delete</a>
+            @* <a onclick="deleteUser(@Model.CompanyUsers[i].Id)" class="btn btn-danger">Delete</a> *@
+            <a onclick="openConfirm(@Model.CompanyUsers[i].Id, '@Model.CompanyUsers[i].Name')" class="btn btn-danger">Delete</a>
         </td>
     </tr>
 }

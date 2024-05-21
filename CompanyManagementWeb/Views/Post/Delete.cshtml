@@ -4,46 +4,50 @@
     ViewData["Title"] = "Xóa bài đăng";
 }
 
-<h3>Bạn có muốn xóa?</h3>
 <div>
-    <h4>Bài đăng</h4>
-    <hr />
-    <dl class="row">
-        <dt class = "col-sm-2">
-            @Html.DisplayNameFor(model => model.Title)
-        </dt>
-        <dd class = "col-sm-10">
-            @Html.DisplayFor(model => model.Title)
-        </dd>
-        <dt class = "col-sm-2">
-            @Html.DisplayNameFor(model => model.Description)
-        </dt>
-        <dd class = "col-sm-10">
-            @Html.DisplayFor(model => model.Description)
-        </dd>
-        <dt class = "col-sm-2">
-            @Html.DisplayNameFor(model => model.CreatedDate)
-        </dt>
-        <dd class = "col-sm-10">
-            @Html.DisplayFor(model => model.CreatedDate)
-        </dd>
-        <dt class = "col-sm-2">
-            @Html.DisplayNameFor(model => model.CategoryName)
-        </dt>
-        <dd class = "col-sm-10">
-            @Html.DisplayFor(model => model.CategoryName)
-        </dd>
-        <dt class = "col-sm-2">
-            @Html.DisplayNameFor(model => model.DepartmentName)
-        </dt>
-        <dd class = "col-sm-10">
-            @Html.DisplayFor(model => model.DepartmentName)
-        </dd>
-    </dl>
-    
-    <form asp-action="Delete">
-        <input type="hidden" asp-for="Id" />
-        <input type="submit" value="Xóa" class="btn btn-danger" /> |
-        <a asp-action="Index">Trở về</a>
-    </form>
+    <a asp-action="Index">Trở về</a>
+</div>
+<h1>Bạn có muốn xóa?</h1>
+<div class="card mt-4">
+    <div class="card-body">
+        <h4 class="card-title">Bài đăng</h4>
+        <hr />
+        <dl class="row">
+            <dt class = "col-sm-2">
+                Tiêu đề
+            </dt>
+            <dd class = "col-sm-10">
+                @Html.DisplayFor(model => model.Title)
+            </dd>
+            <dt class = "col-sm-2">
+                Mô tả
+            </dt>
+            <dd class = "col-sm-10">
+                @Html.DisplayFor(model => model.Description)
+            </dd>
+            <dt class = "col-sm-2">
+                Ngày tạo
+            </dt>
+            <dd class = "col-sm-10">
+                @Html.DisplayFor(model => model.CreatedDate)
+            </dd>
+            <dt class = "col-sm-2">
+                Danh mục
+            </dt>
+            <dd class = "col-sm-10">
+                @Html.DisplayFor(model => model.CategoryName)
+            </dd>
+            <dt class = "col-sm-2">
+                Phòng ban
+            </dt>
+            <dd class = "col-sm-10">
+                @Html.DisplayFor(model => model.DepartmentName)
+            </dd>
+        </dl>
+        
+        <form asp-action="Delete">
+            <input type="hidden" asp-for="Id" />
+            <input type="submit" value="Xóa" class="btn btn-danger" />
+        </form>
+    </div>
 </div>
