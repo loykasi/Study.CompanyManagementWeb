@@ -54,12 +54,14 @@
             </table>
         }
     </div>
+    @if (await userService.IsInPermission("Role", "Edit"))
+    {
     <div class="card-footer">
-        @if (await userService.IsInPermission("Role", "Edit"))
-        {
+        
             <a asp-action="Edit" asp-route-id="@item.Id" class="btn btn-primary">Chỉnh sửa</a>
             <a asp-action="Delete" asp-route-id="@item.Id" class="btn btn-danger">Xóa</a>
-        }
+        
     </div>
+    }
 </div>
 }

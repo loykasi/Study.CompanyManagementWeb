@@ -5,6 +5,7 @@ using CompanyManagementWeb.DataAccess;
 using CompanyManagementWeb.Models;
 using CompanyManagementWeb.ViewModels;
 using CompanyManagementWeb.Data;
+using CompanyManagementWeb.Attributes;
 
 namespace CompanyManagementWeb.Controllers
 {
@@ -20,6 +21,7 @@ namespace CompanyManagementWeb.Controllers
         }
 
         // GET: Role
+        [JwtAuthorizationFilter(resource: ResourceEnum.Role, permission: PermissionEnum.View)]
         public async Task<IActionResult> Index()
         {
             RoleIndexViewModel roleIndexViewModel = new()
@@ -51,6 +53,7 @@ namespace CompanyManagementWeb.Controllers
         }
 
         // GET: Role/Create
+        [JwtAuthorizationFilter(resource: ResourceEnum.Role, permission: PermissionEnum.Edit)]
         public async Task<IActionResult> Create()
         {
             RoleCreateViewModel roleCreateViewModel = new()
@@ -76,6 +79,7 @@ namespace CompanyManagementWeb.Controllers
         // POST: Role/Create
         [HttpPost]
         [ValidateAntiForgeryToken]
+        [JwtAuthorizationFilter(resource: ResourceEnum.Role, permission: PermissionEnum.Edit)]
         public async Task<IActionResult> Create(RoleCreateViewModel roleCreateViewModel)
         {
             if (ModelState.IsValid)
@@ -121,6 +125,7 @@ namespace CompanyManagementWeb.Controllers
         }
 
         // GET: Role/Edit/5
+        [JwtAuthorizationFilter(resource: ResourceEnum.Role, permission: PermissionEnum.Edit)]
         public async Task<IActionResult> Edit(int? id)
         {
             if (id == null)
@@ -190,6 +195,7 @@ namespace CompanyManagementWeb.Controllers
         // POST: Role/Edit/5
         [HttpPost]
         [ValidateAntiForgeryToken]
+        [JwtAuthorizationFilter(resource: ResourceEnum.Role, permission: PermissionEnum.Edit)]
         public async Task<IActionResult> Edit(RoleCreateViewModel roleCreateViewModel)
         {
             if (ModelState.IsValid)
@@ -229,6 +235,7 @@ namespace CompanyManagementWeb.Controllers
         }
 
         // GET: Role/Delete/5
+        [JwtAuthorizationFilter(resource: ResourceEnum.Role, permission: PermissionEnum.Edit)]
         public async Task<IActionResult> Delete(int? id)
         {
             if (id == null)
@@ -250,6 +257,7 @@ namespace CompanyManagementWeb.Controllers
         // POST: Role/Delete/5
         [HttpPost, ActionName("Delete")]
         [ValidateAntiForgeryToken]
+        [JwtAuthorizationFilter(resource: ResourceEnum.Role, permission: PermissionEnum.Edit)]
         public async Task<IActionResult> DeleteConfirmed(int id)
         {
             var role = await _context.Roles.FindAsync(id);

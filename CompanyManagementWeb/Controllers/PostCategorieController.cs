@@ -8,6 +8,8 @@ using Microsoft.EntityFrameworkCore;
 using CompanyManagementWeb.DataAccess;
 using CompanyManagementWeb.Models;
 using CompanyManagementWeb.ViewModels;
+using CompanyManagementWeb.Attributes;
+using CompanyManagementWeb.Data;
 
 namespace CompanyManagementWeb.Controllers
 {
@@ -21,6 +23,7 @@ namespace CompanyManagementWeb.Controllers
         }
 
         // GET: PostCategorie
+        [JwtAuthorizationFilter(resource: ResourceEnum.PostCategory, permission: PermissionEnum.View)]
         public async Task<IActionResult> Index()
         {
             int companyId = HttpContext.Session.GetInt32("companyId").Value;
@@ -29,6 +32,7 @@ namespace CompanyManagementWeb.Controllers
         }
 
         // GET: PostCategorie/Details/5
+        [JwtAuthorizationFilter(resource: ResourceEnum.PostCategory, permission: PermissionEnum.Edit)]
         public async Task<IActionResult> Details(int? id)
         {
             if (id == null)
@@ -47,6 +51,7 @@ namespace CompanyManagementWeb.Controllers
         }
 
         // GET: PostCategorie/Create
+        [JwtAuthorizationFilter(resource: ResourceEnum.PostCategory, permission: PermissionEnum.Edit)]
         public IActionResult Create()
         {
             return View();
@@ -55,6 +60,7 @@ namespace CompanyManagementWeb.Controllers
         // POST: PostCategorie/Create
         [HttpPost]
         [ValidateAntiForgeryToken]
+        [JwtAuthorizationFilter(resource: ResourceEnum.PostCategory, permission: PermissionEnum.Edit)]
         public async Task<IActionResult> Create(PostCategoryCreateViewModel postCategoryCreateViewModel)
         {
             if (ModelState.IsValid)
@@ -72,6 +78,7 @@ namespace CompanyManagementWeb.Controllers
         }
 
         // GET: PostCategorie/Edit/5
+        [JwtAuthorizationFilter(resource: ResourceEnum.PostCategory, permission: PermissionEnum.Edit)]
         public async Task<IActionResult> Edit(int? id)
         {
             if (id == null)
@@ -95,6 +102,7 @@ namespace CompanyManagementWeb.Controllers
         // POST: PostCategorie/Edit/5
         [HttpPost]
         [ValidateAntiForgeryToken]
+        [JwtAuthorizationFilter(resource: ResourceEnum.PostCategory, permission: PermissionEnum.Edit)]
         public async Task<IActionResult> Edit(PostCategoryCreateViewModel postCategoryCreateViewModel)
         {
             if (ModelState.IsValid)
@@ -122,28 +130,10 @@ namespace CompanyManagementWeb.Controllers
             return View(postCategoryCreateViewModel);
         }
 
-        // GET: PostCategorie/Delete/5
-        public async Task<IActionResult> Delete(int? id)
-        {
-            if (id == null)
-            {
-                return NotFound();
-            }
-
-            var postCategory = await _context.PostCategories
-                .FirstOrDefaultAsync(m => m.Id == id);
-            if (postCategory == null)
-            {
-                return NotFound();
-            }
-
-            return View(postCategory);
-        }
-
         // POST: PostCategorie/Delete/5
-        [HttpPost, ActionName("Delete")]
-        [ValidateAntiForgeryToken]
-        public async Task<IActionResult> DeleteConfirmed(int id)
+        [HttpPost]
+        [JwtAuthorizationFilter(resource: ResourceEnum.PostCategory, permission: PermissionEnum.Edit)]
+        public async Task<IActionResult> Delete(int id)
         {
             var postCategory = await _context.PostCategories.FindAsync(id);
             if (postCategory != null)
@@ -152,7 +142,10 @@ namespace CompanyManagementWeb.Controllers
             }
 
             await _context.SaveChangesAsync();
-            return RedirectToAction(nameof(Index));
+
+            int companyId = HttpContext.Session.GetInt32("companyId").Value;
+            var PostCategories = _context.PostCategories.Where(d => d.CompanyId == companyId);
+            return PartialView("PostCategoryListPartial", await PostCategories.ToListAsync());
         }
 
         private bool PostCategoryExists(int id)

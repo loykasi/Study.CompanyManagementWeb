@@ -112,9 +112,7 @@
         function openConfirm(userId, userName) {
             $('#deleteContent').html(userName);
             $('#deleteBtn').attr('onClick','deleteUser(' + userId + ')');
-            @* const myModalAlternative = new bootstrap.Modal('#deleteConfirmModal'); *@
             $('#deleteConfirmModal').modal('show');
-            @* myModalAlternative.show(); *@
         }
     </script>
 }

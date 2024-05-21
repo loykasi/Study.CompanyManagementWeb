@@ -1,0 +1,18 @@
+@model IEnumerable<CompanyManagementWeb.Models.PostCategory>
+@inject CompanyManagementWeb.Services.IUserService userService
+
+@foreach (var item in Model)
+{
+<tr>
+    <td class="align-middle">
+        @Html.DisplayFor(modelItem => item.Name)
+    </td>
+    <td>
+        @if (await userService.IsInPermission("PostCategory", "Edit"))
+        {
+            <a asp-action="Edit" asp-route-id="@item.Id" class="btn btn-primary mx-2 float-end">Chỉnh sửa</a>
+            <a onclick="openConfirm(@item.Id, '@item.Name')" class="btn btn-danger mx-2 float-end">Xóa</a>
+        }
+    </td>
+</tr>
+}

@@ -5,6 +5,7 @@ using CompanyManagementWeb.DataAccess;
 using CompanyManagementWeb.Models;
 using CompanyManagementWeb.ViewModels;
 using CompanyManagementWeb.Data;
+using CompanyManagementWeb.Attributes;
 
 namespace CompanyManagementWeb.Controllers
 {
@@ -20,6 +21,7 @@ namespace CompanyManagementWeb.Controllers
         }
 
         // GET: Schedule
+        [JwtAuthorizationFilter(resource: ResourceEnum.Schedule, permission: PermissionEnum.View)]
         public async Task<IActionResult> Index()
         {
             ScheduleIndexViewModel scheduleIndexViewModel = new()
@@ -56,6 +58,7 @@ namespace CompanyManagementWeb.Controllers
             return View(scheduleIndexViewModel);
         }
 
+        [JwtAuthorizationFilter(resource: ResourceEnum.Schedule, permission: PermissionEnum.View)]
         public IActionResult Search(ScheduleIndexViewModel scheduleIndexViewModel)
         {
             IQueryable<Schedule> schedules = _context.Schedules.Where(d => d.CompanyId == GetCompanyId());
@@ -103,6 +106,7 @@ namespace CompanyManagementWeb.Controllers
             return PartialView("ScheduleListPartial", scheduleIndexViewModel);
         }
 
+        [JwtAuthorizationFilter(resource: ResourceEnum.Schedule, permission: PermissionEnum.View)]
         public IActionResult GetOldSchedules()
         {
             ScheduleIndexViewModel scheduleIndexViewModel = new()
@@ -131,6 +135,7 @@ namespace CompanyManagementWeb.Controllers
             return PartialView("ScheduleListPartial", scheduleIndexViewModel);
         }
 
+        [JwtAuthorizationFilter(resource: ResourceEnum.Schedule, permission: PermissionEnum.View)]
         public IActionResult GetCurrent()
         {
             ScheduleIndexViewModel scheduleIndexViewModel = new()
@@ -160,6 +165,7 @@ namespace CompanyManagementWeb.Controllers
         }
 
         // DETAIL: Schedule/Detail/5
+        [JwtAuthorizationFilter(resource: ResourceEnum.Schedule, permission: PermissionEnum.View)]
         public async Task<IActionResult> Details(int? id)
         {
             if (id == null)
@@ -189,6 +195,7 @@ namespace CompanyManagementWeb.Controllers
         }
 
         // GET: Schedule/Create
+        [JwtAuthorizationFilter(resource: ResourceEnum.Schedule, permission: PermissionEnum.Edit)]
         public IActionResult Create()
         {
             ScheduleEditViewModel scheduleViewModel = new()
@@ -201,6 +208,7 @@ namespace CompanyManagementWeb.Controllers
         // POST: Schedule/Create
         [HttpPost]
         [ValidateAntiForgeryToken]
+        [JwtAuthorizationFilter(resource: ResourceEnum.Schedule, permission: PermissionEnum.Edit)]
         public async Task<IActionResult> Create(ScheduleEditViewModel scheduleViewModel)
         {   
             if (ModelState.IsValid)
@@ -231,6 +239,7 @@ namespace CompanyManagementWeb.Controllers
         }
 
         // GET: Schedule/Edit/5
+        [JwtAuthorizationFilter(resource: ResourceEnum.Schedule, permission: PermissionEnum.Edit)]
         public async Task<IActionResult> Edit(int? id)
         {
             if (id == null)
@@ -261,6 +270,7 @@ namespace CompanyManagementWeb.Controllers
         // POST: Schedule/Edit/5
         [HttpPost]
         [ValidateAntiForgeryToken]
+        [JwtAuthorizationFilter(resource: ResourceEnum.Schedule, permission: PermissionEnum.Edit)]
         public async Task<IActionResult> Edit(ScheduleEditViewModel scheduleViewModel)
         {
             if (ModelState.IsValid)
@@ -304,6 +314,7 @@ namespace CompanyManagementWeb.Controllers
         }
 
         // GET: Schedule/Delete/5
+        [JwtAuthorizationFilter(resource: ResourceEnum.Schedule, permission: PermissionEnum.Edit)]
         public async Task<IActionResult> Delete(int? id)
         {
             if (id == null)
@@ -334,6 +345,7 @@ namespace CompanyManagementWeb.Controllers
         // POST: Schedule/Delete/5
         [HttpPost, ActionName("Delete")]
         [ValidateAntiForgeryToken]
+        [JwtAuthorizationFilter(resource: ResourceEnum.Schedule, permission: PermissionEnum.Edit)]
         public async Task<IActionResult> DeleteConfirmed(ScheduleEditViewModel scheduleViewModel)
         {
             var schedule = await _context.Schedules.FindAsync(scheduleViewModel.Id);

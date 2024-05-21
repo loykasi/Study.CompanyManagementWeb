@@ -92,10 +92,10 @@ namespace CompanyManagementWeb.Services
                 return true;
             }
 
-            if (userCompany.DepartmentId == null)
-            {
-                return false;
-            }
+            // if (userCompany.DepartmentId == null)
+            // {
+            //     return false;
+            // }
             
             return true;
         }

@@ -106,31 +106,10 @@ namespace CompanyManagementWeb.Controllers
             return View(departmentCreateViewModel);
         }
 
-        // GET: Department/Delete/5
-        [JwtAuthorizationFilter(resource: ResourceEnum.Department, permission: PermissionEnum.Edit)]
-        public async Task<IActionResult> Delete(int? id)
-        {
-            if (id == null)
-            {
-                return NotFound();
-            }
-
-            var department = await _context.Departments
-                .Include(d => d.Company)
-                .FirstOrDefaultAsync(m => m.Id == id);
-            if (department == null)
-            {
-                return NotFound();
-            }
-
-            return View(department);
-        }
-
         // POST: Department/Delete/5
-        [HttpPost, ActionName("Delete")]
+        [HttpPost]
         [JwtAuthorizationFilter(resource: ResourceEnum.Department, permission: PermissionEnum.Edit)]
-        [ValidateAntiForgeryToken]
-        public async Task<IActionResult> DeleteConfirmed(int id)
+        public async Task<IActionResult> Delete(int id)
         {
             var department = await _context.Departments.FindAsync(id);
             if (department != null)
@@ -139,7 +118,9 @@ namespace CompanyManagementWeb.Controllers
             }
 
             await _context.SaveChangesAsync();
-            return RedirectToAction(nameof(Index));
+            int companyId = HttpContext.Session.GetInt32("companyId").Value;
+            var departments = _context.Departments.Include(d => d.Company).Where(d => d.CompanyId == companyId);
+            return PartialView("DepartmentListPartial", await departments.ToListAsync());
         }
 
         private bool DepartmentExists(int id)

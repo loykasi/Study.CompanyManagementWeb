@@ -107,11 +107,11 @@ namespace CompanyManagementWeb.Attributes
                 }
             }
 
-            var departmentId = dbContext.UserCompanies.FirstOrDefault(u => u.UserId == userId).DepartmentId;
-            if (!isAdmin && departmentId == null)
-            {
-                return false;
-            }
+            // var departmentId = dbContext.UserCompanies.FirstOrDefault(u => u.UserId == userId).DepartmentId;
+            // if (!isAdmin && departmentId == null)
+            // {
+            //     return false;
+            // }
 
             return true;
         }
