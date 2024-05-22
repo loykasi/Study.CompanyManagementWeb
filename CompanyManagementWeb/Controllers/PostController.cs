@@ -54,6 +54,11 @@ namespace CompanyManagementWeb.Controllers
                                                                                 Value = d.Id.ToString(),
                                                                                 Text = d.Name
                                                                             });
+            postIndexViewModel.Categories = _context.PostCategories.Select(d => new SelectListItem
+                                                                            {
+                                                                                Value = d.Id.ToString(),
+                                                                                Text = d.Name
+                                                                            });
             return View(postIndexViewModel);
         }
 
@@ -69,6 +74,10 @@ namespace CompanyManagementWeb.Controllers
             if (postIndexViewModel.DepartmentId != null)
             {
                 posts = posts.Where(p => p.DepartmentId == postIndexViewModel.DepartmentId);
+            }
+            if (postIndexViewModel.CategoryId != null)
+            {
+                posts = posts.Where(p => p.PostCategoryId == postIndexViewModel.CategoryId);
             }
             if (postIndexViewModel.FromDate != null)
             {

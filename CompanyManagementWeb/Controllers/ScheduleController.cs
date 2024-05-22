@@ -29,7 +29,8 @@ namespace CompanyManagementWeb.Controllers
                 Schedules = new List<ScheduleViewModel>()
             };
 
-            var schedules = _context.Schedules.Where(d => d.StartDate.Value.Date >= DateTime.Now.Date && d.CompanyId == GetCompanyId());
+            IQueryable<Schedule> schedules = _context.Schedules.Where(d => d.StartDate.Value.Date >= DateTime.Now.Date && d.CompanyId == GetCompanyId())
+                                                .OrderBy(s => s.StartDate.Value.Date);
             schedules = schedules.Include(s => s.Employee).Include(s => s.Department);
 
             // var schedules = _context.Schedules.Include(s => s.Employee).Include(s => s.Department).Where(d => d.CompanyId == GetCompanyId());
@@ -61,7 +62,7 @@ namespace CompanyManagementWeb.Controllers
         [JwtAuthorizationFilter(resource: ResourceEnum.Schedule, permission: PermissionEnum.View)]
         public IActionResult Search(ScheduleIndexViewModel scheduleIndexViewModel)
         {
-            IQueryable<Schedule> schedules = _context.Schedules.Where(d => d.CompanyId == GetCompanyId());
+            IQueryable<Schedule> schedules = _context.Schedules.Where(d => d.CompanyId == GetCompanyId()).OrderBy(s => s.StartDate.Value.Date);
             bool hasFromDate = false;
             bool hasToDate = false;
 

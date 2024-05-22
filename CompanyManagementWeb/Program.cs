@@ -55,6 +55,7 @@ if (!app.Environment.IsDevelopment())
 
 app.UseSession();
 app.UseMiddleware<KeepLoginMiddleware>();
+app.UseMiddleware<GroupCheckingMiddleware>();
 
 app.UseHttpsRedirection();
 app.UseStaticFiles();
