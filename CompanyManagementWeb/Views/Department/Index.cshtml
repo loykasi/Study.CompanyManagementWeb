@@ -1,0 +1,184 @@
+﻿@* @model IEnumerable<CompanyManagementWeb.Models.Department> *@
+@model CompanyManagementWeb.ViewModels.DepartmentViewModel
+@inject CompanyManagementWeb.Services.IUserService userService
+
+@{
+    ViewData["Title"] = "Index";
+}
+
+<div class="d-flex justify-content-between my-3">
+    <h2 class="m-0 align-bottom">Phòng ban</h2>
+    @if (await userService.IsInPermission("Department", "Edit"))
+    {
+        <a class="m-0 align-bottom btn btn-secondary" onclick="openCreateModal()">Tạo phòng ban</a>
+    }
+</div>
+<table class="table">
+    <thead>
+        <tr>
+            <th>
+                Tên phòng ban
+            </th>
+            <th></th>
+        </tr>
+    </thead>
+    <tbody id="content">
+        <partial name="DepartmentListPartial" model="Model"></partial>
+    </tbody>
+</table>
+
+<!-- Delete Confirmation Modal -->
+<div class="modal fade" id="deleteConfirmModal" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h1 class="modal-title fs-5" id="exampleModalLabel">Bạn có muốn xóa</h1>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+      <div class="modal-body">
+        Danh mục: <span id="deleteContent"></span>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Đóng</button>
+        <button id="deleteBtn" type="button" class="btn btn-danger">Xóa</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!--Create Modal -->
+<div class="modal fade" id="createModal" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
+  <div class="modal-dialog">
+    <div class="modal-content">
+        <form id="createForm" asp-action="Create">
+        <div class="modal-body">
+            <div class="mb-3">
+                <label asp-for="DepartmentCreateViewModel.Name" class="col-form-label">Phòng ban:</label>
+                <input id="createInputField" asp-for="DepartmentCreateViewModel.Name" class="form-control" />
+                <span asp-validation-for="DepartmentCreateViewModel.Name" class="text-danger"></span>
+            </div>
+        </div>
+        <div class="modal-footer">
+            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Đóng</button>
+            <button id="createBtn" type="submit" class="btn btn-primary">Thêm</button>
+        </div>
+        </form>
+    </div>
+  </div>
+</div>
+
+<!--Edit Modal -->
+<div class="modal fade" id="editModal" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
+  <div class="modal-dialog">
+    <div class="modal-content">
+        <form id="editForm" asp-action="Edit">
+        <div class="modal-body">
+            <input id="hiddenIdField" type="hidden" asp-for="DepartmentCreateViewModel.Id" />
+            <div class="mb-3">
+                <label asp-for="DepartmentCreateViewModel.Name" class="col-form-label">Phòng ban:</label>
+                <input id="editInputField" asp-for="DepartmentCreateViewModel.Name" class="form-control" />
+                <span asp-validation-for="DepartmentCreateViewModel.Name" class="text-danger"></span>
+            </div>
+        </div>
+        <div class="modal-footer">
+            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Đóng</button>
+            <button id="editBtn" type="submit" class="btn btn-primary">Lưu</button>
+        </div>
+        </form>
+    </div>
+  </div>
+</div>
+
+@section Scripts {
+    @{await Html.RenderPartialAsync("_ValidationScriptsPartial");}
+    <script>
+        const hiddenidField = document.getElementById("hiddenIdField");
+        const editInputField = document.getElementById("editInputField");
+        const createInputField = document.getElementById("createInputField");
+
+        function deleteDepartment(id) {
+            $.ajax({
+                type: 'POST',
+                url: '@Url.Action("Delete")',
+                data: {
+                    id: id
+                },
+                success: function (response) {
+                    $('#deleteConfirmModal').modal('hide');
+                    $('#content').html(response);
+                },
+                error: function (response, status, error) {
+                    console.log(status);
+                },
+            });
+        }
+
+        function openConfirm(id, text) {
+            $('#deleteContent').html(text);
+            $('#deleteBtn').attr('onClick','deleteDepartment(' + id + ')');
+            $('#deleteConfirmModal').modal('show');
+        }
+
+        function openCreateModal() {
+            createInputField.value = "";
+            $('#createModal').modal('show');
+        }
+
+        function openEditModal(id, text) {
+            hiddenidField.value = id;
+            editInputField.value = text;
+
+            $('#editModal').modal('show');
+        }
+
+        $("#createForm").submit(function(e) {
+            e.preventDefault();
+            console.log("create");
+
+            var form = $(this);
+            var actionUrl = form.attr('action');
+
+            $.ajax({
+                type: 'POST',
+                url: actionUrl,
+                data: form.serialize(),
+                success: function (response) {
+                    if (response != null) {
+                        $('#content').html(response);
+                        $('#createModal').modal('hide');
+                    } else {
+                        console.log('invalid');
+                    }
+                },
+                error: function (response, status, error) {
+                    console.log(status);
+                },
+            });
+        });
+
+        $("#editForm").submit(function(e) {
+            e.preventDefault();
+            console.log("create");
+
+            var form = $(this);
+            var actionUrl = form.attr('action');
+
+            $.ajax({
+                type: 'POST',
+                url: actionUrl,
+                data: form.serialize(),
+                success: function (response) {
+                    if (response != null) {
+                        $('#content').html(response);
+                        $('#editModal').modal('hide');
+                    } else {
+                        console.log('invalid');
+                    }
+                },
+                error: function (response, status, error) {
+                    console.log(status);
+                },
+            });
+        });
+    </script>
+}

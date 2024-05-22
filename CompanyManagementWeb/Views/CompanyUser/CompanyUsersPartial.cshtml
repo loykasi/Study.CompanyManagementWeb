@@ -1,0 +1,58 @@
+@model CompanyManagementWeb.ViewModels.CompanyUserIndexViewModel
+@inject CompanyManagementWeb.Services.IUserService userService
+
+@for (int i = 0; i < Model.CompanyUsers.Count; i++)
+{
+    <tr>
+        <td class="align-middle">
+            @Model.CompanyUsers[i].Name
+        </td>
+        <td>
+            @if (await userService.IsInPermission("Member", "Edit"))
+            {
+                <select id="department" onchange="selectDepartment(@Model.CompanyUsers[i].Id, this)" asp-for="@Model.CompanyUsers[i].DepartmentId" class ="form-control" asp-items="@Model.CompanyUsers[i].Departments">
+                    <option value="">Select</option>
+                </select>
+            }
+            else
+            {
+                var selected = @Model.CompanyUsers[i].Departments.FirstOrDefault(x => x.Selected);
+                if (selected != null)
+                {
+                    <span>@selected.Text</span>
+                }
+                else
+                {
+                    <span>Không thuộc phòng ban</span>
+                }
+            }
+        </td>
+        <td>
+            @if (await userService.IsInPermission("Member", "Edit"))
+            {
+                <select id="role" onchange="selectRole(@Model.CompanyUsers[i].Id, this)" asp-for="@Model.CompanyUsers[i].RoleId" class ="form-control" asp-items="@Model.CompanyUsers[i].Roles">
+                    <option value="">Select</option>
+                </select>
+            }
+            else
+            {
+                var selected = @Model.CompanyUsers[i].Roles.FirstOrDefault(x => x.Selected);
+                if (selected != null)
+                {
+                    <span>@selected.Text</span>
+                }
+                else
+                {
+                    <span>Không có vai trò</span>
+                }
+            }
+        </td>
+        <td>
+            @* <a onclick="deleteUser(@Model.CompanyUsers[i].Id)" class="btn btn-danger">Delete</a> *@
+            @if (await userService.IsInPermission("Member", "Edit"))
+            {
+                <a onclick="openConfirm(@Model.CompanyUsers[i].Id, '@Model.CompanyUsers[i].Name')" class="btn btn-danger">Xóa</a>
+            }
+        </td>
+    </tr>
+}

@@ -1,0 +1,23 @@
+﻿@model CompanyManagementWeb.ViewModels.ScheduleViewModel
+@inject CompanyManagementWeb.Services.IUserService userService
+
+@{
+    ViewData["Title"] = "Details";
+}
+
+<div>
+    <a asp-action="Index">Trở về</a>
+    @if (await userService.IsInPermission("Schedule", "Edit"))
+    {
+        <span>| <a asp-action="Edit" asp-route-id="@Model?.Id">Chỉnh sửa</a></span>
+        <span>| <a asp-action="Delete" asp-route-id="@Model?.Id">Xóa</a></span>
+    }
+</div>
+<div class="d-flex justify-content-between mt-4">
+    <span class=""><em>@Model.DepartmentName</em></span>
+    <span class=""><em>@Model.FormattedDate | @Model.FormattedStartTime - @Model.FormattedEndTime</em></span>
+</div>
+<h1>@Model.Title</h1>
+<h5>@Model.Description</h5>
+<hr />
+<div>@Html.Raw(Model.Content)</div>

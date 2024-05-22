@@ -1,0 +1,118 @@
+@* @model CompanyManagementWeb.ViewModels.CompanyUserIndexViewModel *@
+
+@{
+    ViewData["Title"] = "Index";
+}
+
+<div class="d-flex justify-content-between my-3">
+    <h2 class="m-0 align-bottom">Thành viên tham gia</h2>
+</div>
+<div class="card">
+    <div class="card-body">
+        <table class="table">
+            <thead>
+                <tr>
+                    <th>
+                        Người tham gia
+                    </th>
+                    <th>
+                        Phòng ban
+                    </th>
+                    <th>
+                        Quyền hạn
+                    </th>
+                    <th></th>
+                </tr>
+            </thead>
+            <tbody id="content">
+                <partial name="CompanyUsersPartial" model="Model">
+            </tbody>
+        </table>
+    </div>
+</div>
+
+<!-- Delete Confirmation Modal -->
+<div class="modal fade" id="deleteConfirmModal" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h1 class="modal-title fs-5" id="exampleModalLabel">Bạn có muốn xóa</h1>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+      <div class="modal-body">
+        Tài khoản: <span id="deleteContent"></span>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Đóng</button>
+        <button id="deleteBtn" type="button" class="btn btn-danger">Xóa</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+@section Scripts {
+    <script>
+        function selectDepartment(userId, selectObject) {
+            console.log('call post');
+            $.ajax({
+                type: 'post',
+                url: '@Url.Action("SetDepartment")',
+                dataType: "json",
+                data: {
+                    userId: userId,
+                    departmentId: selectObject.value
+                },
+                success: function (response) {
+                    console.log(response);
+                },
+                error: function (response, status, error) {
+                    console.log(status);
+                },
+            });
+        };
+
+        function selectRole(userId, selectObject) {
+            console.log('call post');
+            $.ajax({
+                type: 'post',
+                url: '@Url.Action("SetRole")',
+                dataType: "json",
+                data: {
+                    userId: userId,
+                    roleId: selectObject.value
+                },
+                success: function (response) {
+                    console.log(response);
+                },
+                error: function (response, status, error) {
+                    console.log(status);
+                },
+            });
+        };
+
+        function deleteUser(userId) {
+            console.log('call post');
+            $.ajax({
+                type: 'post',
+                url: '@Url.Action("Delete")',
+                data: {
+                    userId: userId
+                },
+                success: function (response) {
+                    $('#deleteConfirmModal').modal('hide');
+                    $('#content').html(response);
+                    console.log(response);
+                },
+                error: function (response, status, error) {
+                    console.log(status);
+                },
+            });
+        }
+
+        function openConfirm(userId, userName) {
+            $('#deleteContent').html(userName);
+            $('#deleteBtn').attr('onClick','deleteUser(' + userId + ')');
+            $('#deleteConfirmModal').modal('show');
+        }
+    </script>
+}

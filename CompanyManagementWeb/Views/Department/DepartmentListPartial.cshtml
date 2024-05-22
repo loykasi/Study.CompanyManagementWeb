@@ -1,0 +1,18 @@
+@* @model IEnumerable<CompanyManagementWeb.Models.Department> *@
+@model CompanyManagementWeb.ViewModels.DepartmentViewModel
+@inject CompanyManagementWeb.Services.IUserService userService
+
+@foreach (var item in Model.Departments) {
+<tr>
+    <td class="align-middle">
+        @Html.DisplayFor(modelItem => item.Name)
+    </td>
+    <td class="">
+        @if (await userService.IsInPermission("Department", "Edit"))
+        {
+            <a onclick="openEditModal(@item.Id, '@item.Name')" class="btn btn-primary mx-2 float-end">Chỉnh sửa</a>
+            <a onclick="openConfirm(@item.Id, '@item.Name')" class="btn btn-danger mx-2 float-end">Xóa</a>
+        }
+    </td>
+</tr>
+}

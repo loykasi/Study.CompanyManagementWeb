@@ -1,0 +1,24 @@
+@model CompanyManagementWeb.ViewModels.PostIndexViewModel
+@inject CompanyManagementWeb.Services.IUserService userService
+
+@foreach (var item in Model.Posts)
+{
+    <div class="card mt-3" onclick="window.location.href = '/Post/Details/' + @item.Id;" style="cursor: pointer;">
+        <div class="card-body">
+            <h4 class="card-title">@item.Title</h4>
+            <div>@item.Description</div>
+            
+            <div class="d-flex justify-content-between mt-4">
+                <span class=""><em>@item.CategoryName</em></span>
+                <span class=""><em>@(string.IsNullOrEmpty(item.DepartmentName) ? "" : item.DepartmentName + " -") @item.CreatedDate.Value.ToString("dd/MM/yyyy hh:mm tt")</em></span>
+            </div>
+        </div>
+        @if (await userService.IsInPermission("Post", "Edit"))
+        {
+            <div class="card-footer">        
+                <a asp-action="Edit" asp-route-id="@item.Id" class="btn btn-danger">Chỉnh sửa</a>
+                <a asp-action="Delete" asp-route-id="@item.Id" class="btn btn-danger">Xóa</a>
+            </div>
+        }
+    </div>
+}

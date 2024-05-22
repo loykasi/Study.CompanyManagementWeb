@@ -1,12 +1,13 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
+﻿using CompanyManagementWeb.Attributes;
+using CompanyManagementWeb.Data;
+using CompanyManagementWeb.DataAccess;
+using CompanyManagementWeb.Models;
+using CompanyManagementWeb.ViewModels;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.EntityFrameworkCore;
-using CompanyManagementWeb.DataAccess;
-using CompanyManagementWeb.Models;
+using Microsoft.IdentityModel.Tokens;
 
 namespace CompanyManagementWeb.Controllers
 {
@@ -20,13 +21,95 @@ namespace CompanyManagementWeb.Controllers
         }
 
         // GET: UploadPost
+        [JwtAuthorizationFilter(resource: ResourceEnum.Post, permission: PermissionEnum.View)]
         public async Task<IActionResult> Index()
         {
-            var companyManagementDbContext = _context.Posts.Include(p => p.Employee);
-            return View(await companyManagementDbContext.ToListAsync());
+            PostIndexViewModel postIndexViewModel = new()
+            { 
+                Posts = new List<PostViewModel>()
+            };
+
+            
+            var schedules = await _context.Posts.Include(s => s.PostCategory)
+                                            .Include(s => s.Employee)
+                                            .Include(s => s.Department)
+                                            .Where(d => d.CompanyId == GetCompanyId()).ToListAsync();
+            foreach (var item in schedules)
+            {
+                postIndexViewModel.Posts.Add(new PostViewModel
+                    {
+                        Id = item.Id,
+                        Title = item.Title,
+                        Description = item.Description,
+                        Content = item.Content,
+                        CreatedDate = item.CreatedDate,
+                        CategoryName = item.PostCategory?.Name ?? "",
+                        DepartmentName = item.Department?.Name ?? "",
+                        EmployeeName = item.Employee?.Name ?? "",
+                    });
+            }
+
+            postIndexViewModel.Departments = _context.Departments.Select(d => new SelectListItem
+                                                                            {
+                                                                                Value = d.Id.ToString(),
+                                                                                Text = d.Name
+                                                                            });
+            postIndexViewModel.Categories = _context.PostCategories.Select(d => new SelectListItem
+                                                                            {
+                                                                                Value = d.Id.ToString(),
+                                                                                Text = d.Name
+                                                                            });
+            return View(postIndexViewModel);
+        }
+
+        [JwtAuthorizationFilter(resource: ResourceEnum.Post, permission: PermissionEnum.View)]
+        public async Task<IActionResult> Search(PostIndexViewModel postIndexViewModel)
+        {
+            IQueryable<Post> posts = _context.Posts.Where(d => d.CompanyId == GetCompanyId());
+
+            if (!postIndexViewModel.SearchValue.IsNullOrEmpty())
+            {
+                posts = posts.Where(p => p.Title.Contains(postIndexViewModel.SearchValue));
+            }
+            if (postIndexViewModel.DepartmentId != null)
+            {
+                posts = posts.Where(p => p.DepartmentId == postIndexViewModel.DepartmentId);
+            }
+            if (postIndexViewModel.CategoryId != null)
+            {
+                posts = posts.Where(p => p.PostCategoryId == postIndexViewModel.CategoryId);
+            }
+            if (postIndexViewModel.FromDate != null)
+            {
+                posts = posts.Where(p => p.CreatedDate >= postIndexViewModel.FromDate);
+            }
+            if (postIndexViewModel.ToDate != null)
+            {
+                posts = posts.Where(p => p.CreatedDate <= postIndexViewModel.ToDate);
+            }
+            posts = posts.Include(s => s.PostCategory).Include(s => s.Employee).Include(s => s.Department);
+
+            postIndexViewModel.Posts = new List<PostViewModel>();
+            foreach (var item in posts)
+            {
+                postIndexViewModel.Posts.Add(new PostViewModel
+                    {
+                        Id = item.Id,
+                        Title = item.Title,
+                        Description = item.Description,
+                        Content = item.Content,
+                        CreatedDate = item.CreatedDate,
+                        CategoryName = item.PostCategory?.Name ?? "",
+                        DepartmentName = item.Department?.Name ?? "",
+                        EmployeeName = item.Employee?.Name ?? "",
+                    });
+            }
+
+            return PartialView("PostListPartial", postIndexViewModel);
         }
 
         // GET: UploadPost/Details/5
+        [JwtAuthorizationFilter(resource: ResourceEnum.Post, permission: PermissionEnum.View)]
         public async Task<IActionResult> Details(int? id)
         {
             if (id == null)
@@ -35,41 +118,76 @@ namespace CompanyManagementWeb.Controllers
             }
 
             var post = await _context.Posts
-                .Include(p => p.Employee)
-                .FirstOrDefaultAsync(m => m.Id == id);
+                            .Include(p => p.PostCategory)
+                            .Include(p => p.Employee)
+                            .Include(p => p.Department)
+                            .FirstOrDefaultAsync(p => p.Id == id);
             if (post == null)
             {
                 return NotFound();
             }
 
-            return View(post);
+            PostViewModel postViewModel = new()
+            {
+                Id = post.Id,
+                Title = post.Title,
+                Description = post.Description,
+                Content = post.Content,
+                CreatedDate = post.CreatedDate,
+                CategoryName = post.PostCategory?.Name ?? "",
+                DepartmentName = post.Department?.Name ?? "",
+                EmployeeName = post.Employee?.Name ?? "",
+            };
+
+            return View(postViewModel);
         }
 
         // GET: UploadPost/Create
+        [JwtAuthorizationFilter(resource: ResourceEnum.Post, permission: PermissionEnum.Edit)]
         public IActionResult Create()
         {
-            ViewData["EmployeeId"] = new SelectList(_context.Employees, "Id", "Name");
-            return View();
+            PostCreateViewModel postCreateViewModel = new()
+            {
+                Categories = new SelectList(_context.PostCategories.Where(p => p.CompanyId == GetCompanyId()), "Id", "Name"),
+                Departments = new SelectList(_context.Departments.Where(d => d.CompanyId == GetCompanyId()), "Id", "Name")
+            };
+            return View(postCreateViewModel);
         }
 
         // POST: UploadPost/Create
-        // To protect from overposting attacks, enable the specific properties you want to bind to.
-        // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
+        [JwtAuthorizationFilter(resource: ResourceEnum.Post, permission: PermissionEnum.Edit)]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Create([Bind("Id,Title,Content,CreatedDate,EmployeeId")] Post post)
+        public async Task<IActionResult> Create(PostCreateViewModel postViewModel)
         {
             if (ModelState.IsValid)
             {
+                // To do: get current user ID
+                int employeeId = GetUserId();
+
+                Post post = new Post
+                {
+                    Title = postViewModel.Title,
+                    Description = postViewModel.Description,
+                    Content = postViewModel.Content,
+                    CreatedDate = DateTime.Now,
+                    PostCategoryId = postViewModel.CategoryID.Value,
+                    DepartmentId = postViewModel.DepartmentId,
+                    EmployeeId = employeeId,
+                    CompanyId = GetCompanyId()
+                    // CompanyId = HttpContext.Session.GetInt32(SessionVariable.CompanyId).Value
+                };
+
                 _context.Add(post);
                 await _context.SaveChangesAsync();
                 return RedirectToAction(nameof(Index));
             }
-            ViewData["EmployeeId"] = new SelectList(_context.Employees, "Id", "Id", post.EmployeeId);
-            return View(post);
+
+            return View("Index", postViewModel);
         }
 
         // GET: UploadPost/Edit/5
+        [JwtAuthorizationFilter(resource: ResourceEnum.Post, permission: PermissionEnum.Edit)]
         public async Task<IActionResult> Edit(int? id)
         {
             if (id == null)
@@ -82,32 +200,49 @@ namespace CompanyManagementWeb.Controllers
             {
                 return NotFound();
             }
-            ViewData["EmployeeId"] = new SelectList(_context.Employees, "Id", "Id", post.EmployeeId);
-            return View(post);
+            
+            PostCreateViewModel postCreateViewModel = new()
+            {
+                Id = post.Id,
+                Title = post.Title,
+                Description = post.Description,
+                Content = post.Content,
+                CategoryID = post.PostCategoryId,
+                DepartmentId = post.DepartmentId,
+                Categories = new SelectList(_context.PostCategories, "Id", "Name", post.PostCategoryId),
+                Departments = new SelectList(_context.Departments, "Id", "Name", post.DepartmentId)
+            };
+            
+            return View(postCreateViewModel);
         }
 
         // POST: UploadPost/Edit/5
-        // To protect from overposting attacks, enable the specific properties you want to bind to.
-        // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
+        [JwtAuthorizationFilter(resource: ResourceEnum.Post, permission: PermissionEnum.Edit)]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Edit(int id, [Bind("Id,Title,Content,CreatedDate,EmployeeId")] Post post)
+        public async Task<IActionResult> Edit(PostCreateViewModel postViewModel)
         {
-            if (id != post.Id)
-            {
-                return NotFound();
-            }
-
             if (ModelState.IsValid)
             {
                 try
                 {
+                    var post = await _context.Posts.FindAsync(postViewModel.Id);
+                    if (post == null)
+                    {
+                        return NotFound();
+                    }
+                    post.Title = postViewModel.Title;
+                    post.Content = postViewModel.Content;
+                    post.Description = postViewModel.Description;
+                    post.PostCategoryId = postViewModel.CategoryID.Value;
+                    post.DepartmentId = postViewModel.DepartmentId;
+
                     _context.Update(post);
                     await _context.SaveChangesAsync();
                 }
                 catch (DbUpdateConcurrencyException)
                 {
-                    if (!PostExists(post.Id))
+                    if (!PostExists(postViewModel.Id))
                     {
                         return NotFound();
                     }
@@ -118,11 +253,12 @@ namespace CompanyManagementWeb.Controllers
                 }
                 return RedirectToAction(nameof(Index));
             }
-            ViewData["EmployeeId"] = new SelectList(_context.Employees, "Id", "Id", post.EmployeeId);
-            return View(post);
+            
+            return View(postViewModel);
         }
 
         // GET: UploadPost/Delete/5
+        [JwtAuthorizationFilter(resource: ResourceEnum.Post, permission: PermissionEnum.Edit)]
         public async Task<IActionResult> Delete(int? id)
         {
             if (id == null)
@@ -131,18 +267,33 @@ namespace CompanyManagementWeb.Controllers
             }
 
             var post = await _context.Posts
-                .Include(p => p.Employee)
-                .FirstOrDefaultAsync(m => m.Id == id);
+                                        .Include(p => p.PostCategory)
+                                        .Include(p => p.Employee)
+                                        .Include(p => p.Department)
+                                        .FirstOrDefaultAsync(p => p.Id == id);
             if (post == null)
             {
                 return NotFound();
             }
 
-            return View(post);
+            PostViewModel postViewModel = new PostViewModel
+            {
+                Id = post.Id,
+                Title = post.Title,
+                Description = post.Description,
+                Content = post.Content,
+                CreatedDate = post.CreatedDate,
+                CategoryName = post.PostCategory?.Name ?? "",
+                DepartmentName = post.Department?.Name ?? "",
+                EmployeeName = post.Employee?.Name ?? "",
+            };
+
+            return View(postViewModel);
         }
 
         // POST: UploadPost/Delete/5
         [HttpPost, ActionName("Delete")]
+        [JwtAuthorizationFilter(resource: ResourceEnum.Post, permission: PermissionEnum.Edit)]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> DeleteConfirmed(int id)
         {
@@ -159,6 +310,16 @@ namespace CompanyManagementWeb.Controllers
         private bool PostExists(int id)
         {
             return _context.Posts.Any(e => e.Id == id);
+        }
+
+        private int GetCompanyId()
+        {
+            return HttpContext.Session.GetInt32(SessionVariable.CompanyId).Value;
+        }
+
+        private int GetUserId()
+        {
+            return HttpContext.Session.GetInt32(SessionVariable.UserId).Value;
         }
     }
 }

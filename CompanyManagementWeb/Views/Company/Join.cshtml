@@ -1,0 +1,34 @@
+@model CompanyManagementWeb.ViewModels.CompanyJoinViewModel
+
+@{
+    ViewData["Title"] = "Vào công ty";
+}
+
+<h3>Vào công ty</h3>
+<hr />
+<div class="row">
+    <div class="col-md-4">
+        <form asp-action="Join">
+            <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+            <div class="form-group mb-2">
+                <label asp-for="Code" class="control-label my-2">Mã mời</label>
+                <input asp-for="Code" class="form-control" />
+                @* <span asp-validation-for="Code" class="text-danger"></span> *@
+                @{
+                    var codeError = ViewData.ModelState["CodeError"]?.Errors.FirstOrDefault()?.ErrorMessage;
+                }
+                @if (!string.IsNullOrEmpty(codeError))
+                {
+                    <span class="text-danger">@codeError</span>
+                }
+            </div>
+            <div class="form-group">
+                <input type="submit" value="Tham gia" class="btn btn-primary" />
+            </div>
+        </form>
+    </div>
+</div>
+
+@section Scripts {
+    @{await Html.RenderPartialAsync("_ValidationScriptsPartial");}
+}
