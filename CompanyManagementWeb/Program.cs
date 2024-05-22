@@ -10,9 +10,11 @@ var builder = WebApplication.CreateBuilder(args);
 
 // Add services to the container.
 builder.Services.AddControllersWithViews();
+builder.Services.AddHttpContextAccessor();
 builder.Services.AddDbContext<CompanyManagementDbContext>
 (
-    options => options.UseSqlServer(builder.Configuration.GetConnectionString("CompanyManagementConnection"))
+    options => options.UseSqlServer(builder.Configuration.GetConnectionString("CompanyManagementConnection")),
+    ServiceLifetime.Transient
 );
 builder.Services.AddAuthentication(options =>
 {
@@ -38,6 +40,7 @@ builder.Services.AddSession(options =>
     options.Cookie.HttpOnly = true;
 });
 
+builder.Services.AddScoped<IUserService, UserService>();
 builder.Services.AddScoped<ITokenService, TokenService>();
 
 var app = builder.Build();
@@ -52,6 +55,7 @@ if (!app.Environment.IsDevelopment())
 
 app.UseSession();
 app.UseMiddleware<KeepLoginMiddleware>();
+app.UseMiddleware<GroupCheckingMiddleware>();
 
 app.UseHttpsRedirection();
 app.UseStaticFiles();

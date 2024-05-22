@@ -1,0 +1,42 @@
+@model CompanyManagementWeb.ViewModels.ScheduleIndexViewModel
+@inject CompanyManagementWeb.Services.IUserService userService
+
+@foreach (var group in Model.Schedules.GroupBy(s => s.FormattedDate))
+{
+
+    <div class="p-3 col-md-3 border-bottom @(group.Key == DateTime.Now.Date.ToString("dd/MM/yyyy")? "bg-light" : "")">
+        <h4 class="">
+            @group.Key @(group.Key == DateTime.Now.Date.ToString("dd/MM/yyyy")? "(Hôm nay)" : "")
+        </h4>
+        @foreach (var item in group.OrderBy(g => g.StartTime.Value.TimeOfDay))
+        {
+            <div class="card my-3" onclick="window.location.href = '/Schedule/Details/' + @item.Id;" style="cursor: pointer;">
+                <div class="card-header">
+                    <span>@item.FormattedStartTime - @item.FormattedEndTime</span>
+                </div>
+                <div class="card-body">
+                    <h5 class="card-title">@item.Title</h5>
+                    <div>@item.Description</div>
+                    @if (!string.IsNullOrEmpty(item.Content))
+                    {
+                        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-card-text" viewBox="0 0 16 16">
+                            <path d="M14.5 3a.5.5 0 0 1 .5.5v9a.5.5 0 0 1-.5.5h-13a.5.5 0 0 1-.5-.5v-9a.5.5 0 0 1 .5-.5zm-13-1A1.5 1.5 0 0 0 0 3.5v9A1.5 1.5 0 0 0 1.5 14h13a1.5 1.5 0 0 0 1.5-1.5v-9A1.5 1.5 0 0 0 14.5 2z"/>
+                            <path d="M3 5.5a.5.5 0 0 1 .5-.5h9a.5.5 0 0 1 0 1h-9a.5.5 0 0 1-.5-.5M3 8a.5.5 0 0 1 .5-.5h9a.5.5 0 0 1 0 1h-9A.5.5 0 0 1 3 8m0 2.5a.5.5 0 0 1 .5-.5h6a.5.5 0 0 1 0 1h-6a.5.5 0 0 1-.5-.5"/>
+                        </svg>
+                    }
+                    <div class="d-flex justify-content-between mt-4">
+                        <span class=""><em>@item.DepartmentName</em></span>
+                        <span class=""><em>@item.EmployeeName</em></span>
+                    </div>
+                </div>
+                @if (await userService.IsInPermission("Schedule", "Edit"))
+                {
+                    <div class="card-footer">
+                        <a asp-action="Edit" asp-route-id="@item.Id" class="btn btn-primary">Chỉnh sửa</a>
+                        <a asp-action="Delete" asp-route-id="@item.Id" class="btn btn-primary">Xóa</a>
+                    </div>
+                }
+            </div>
+        }
+    </div>
+}

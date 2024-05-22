@@ -4,49 +4,89 @@
     ViewData["Title"] = "Edit";
 }
 
-<h1>Edit</h1>
-
-<h4>Role</h4>
-<hr />
-<div class="row">
-    <div class="col-md-4">
-        <form asp-action="Edit">
-            <div asp-validation-summary="ModelOnly" class="text-danger"></div>
-            <input type="hidden" asp-for="@Model.Id" />
-            <div class="form-group">
-                <label asp-for="Name" class="control-label">Tên</label>
-                <input asp-for="Name" class="form-control" />
-                <span asp-validation-for="Name" class="text-danger"></span>
-            </div>
-            <div class="form-group">
-                <label class="control-label">Quyền</label>
-                @for (int i = 0; i < Model.RoleDetails.Count; i++)
-                {
-                    <dt class = "col-sm-2">
-                        @Model.RoleDetails[i].Resource
-                    </dt>
-                    <dd class = "col-sm-10">
-                        <input type="hidden" asp-for="@Model.RoleDetails[i].ResourceId" />
-                        <select asp-for="@Model.RoleDetails[i].PermissionId" class ="form-control">
-                            @foreach (var permission in Model.RoleDetails[i].Permissions)
-                            {
-                                <option value="@permission.Value">@permission.Text</option>
-                            }
-                        </select>
-                    </dd>
-                }
-            </div>
-            <div class="form-group">
-                <input type="submit" value="Edit" class="btn btn-primary" />
-            </div>
-        </form>
-    </div>
-</div>
-
 <div>
-    <a asp-action="Index">Back to List</a>
+    <a asp-action="Index">Trở về</a>
+</div>
+<h1>Vai trò</h1>
+<div class="card mt-4">
+    <div class="card-body">
+        <div class="row">
+            <div class="col-md-12">
+                <form asp-action="Edit">
+                    <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+                    <input type="hidden" asp-for="@Model.Id" />
+                    <div class="form-group mb-2">
+                        <label asp-for="Name" class="control-label mb-2">Tên</label>
+                        <input asp-for="Name" class="form-control" />
+                        <span asp-validation-for="Name" class="text-danger"></span>
+                    </div>
+                    <div class="form-group mb-2">
+                        <label class="control-label mb-2">Quyền hạn</label>
+                        <div class="mb-2">
+                            <input type="checkbox" class="form-check-input" asp-for="IsAdmin">
+                            <label asp-for="IsAdmin" class="form-check-label">Quản trị viên</label>
+                        </div>
+                        <hr />
+                        <table id="permissionTable" class="table invisible d-none">
+                            <thead>
+                                <tr>
+                                    <th>
+                                        Danh mục chức năng
+                                    </th>
+                                    <th></th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                        @for (int i = 0; i < Model.RoleDetails.Count; i++)
+                        {
+                            <tr>
+                                <td>
+                                    @Model.RoleDetails[i].Resource
+                                </td>
+                                <td>
+                                    <input type="hidden" asp-for="@Model.RoleDetails[i].ResourceId" />
+                                    <select asp-for="@Model.RoleDetails[i].PermissionId" class ="form-control" asp-items="@Model.RoleDetails[i].Permissions">
+                                    </select>
+                                </td>
+                            </tr>
+                        }
+                            </tbody>
+                        </table>
+                    </div>
+                    <div class="form-group">
+                        <input type="submit" value="Lưu" class="btn btn-primary" />
+                        <a asp-action="Delete" asp-route-id="@Model.Id" class="btn btn-danger">Xóa</a>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
 </div>
 
 @section Scripts {
     @{await Html.RenderPartialAsync("_ValidationScriptsPartial");}
+    <script>
+        const checkbox = document.getElementById('IsAdmin');
+        const permissionTable = document.getElementById('permissionTable');
+
+        function togglePermissionTable()
+        {
+            if (checkbox.checked) {
+                permissionTable.classList.add('invisible');
+                permissionTable.classList.add('d-none');
+            } else {
+                if (permissionTable.classList.contains('invisible')) {
+                    permissionTable.classList.remove('invisible');
+                }
+                if (permissionTable.classList.contains('d-none')) {
+                    permissionTable.classList.remove('d-none');
+                }
+            }
+        };
+
+        checkbox.addEventListener('change', (event) => {
+            togglePermissionTable();
+        });
+        togglePermissionTable();
+    </script>
 }

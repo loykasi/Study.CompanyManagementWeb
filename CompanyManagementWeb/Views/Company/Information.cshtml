@@ -1,0 +1,13 @@
+@model CompanyManagementWeb.ViewModels.CompanyViewModel
+
+@{
+    ViewData["Title"] = @Model.Name;
+}
+
+<div class="d-flex justify-content-between mt-4">
+    <span class=""><em>Thông tin công ty</em></span>
+</div>
+<h1>@Model.Name</h1>
+<h5>@Model.Address</h5>
+<hr />
+<div><span>Mã mời: </span> @Model.InviteCode</div>

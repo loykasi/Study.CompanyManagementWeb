@@ -5,6 +5,7 @@ using CompanyManagementWeb.ViewModels;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.AspNetCore.Mvc.Rendering;
+using CompanyManagementWeb.Attributes;
 
 namespace CompanyManagementWeb.Controllers
 {
@@ -19,6 +20,7 @@ namespace CompanyManagementWeb.Controllers
             _logger = logger;
         }
 
+        [JwtAuthorizationFilter(resource: ResourceEnum.Member, permission: PermissionEnum.View)]
         public async Task<IActionResult> Index()
         {
             CompanyUserIndexViewModel companyUserIndexViewModel = new()
@@ -49,6 +51,7 @@ namespace CompanyManagementWeb.Controllers
             return View(companyUserIndexViewModel);
         }
 
+        [JwtAuthorizationFilter(resource: ResourceEnum.Member, permission: PermissionEnum.Edit)]
         [HttpPost]
         public async Task<IActionResult> SetDepartment(int userId, int? departmentId)
         {
@@ -62,6 +65,7 @@ namespace CompanyManagementWeb.Controllers
             return Json(Ok());
         }
 
+        [JwtAuthorizationFilter(resource: ResourceEnum.Member, permission: PermissionEnum.Edit)]
         [HttpPost]
         public async Task<IActionResult> SetRole(int userId, int? roleId)
         {
@@ -75,6 +79,7 @@ namespace CompanyManagementWeb.Controllers
             return Json(Ok());
         }
 
+        [JwtAuthorizationFilter(resource: ResourceEnum.Member, permission: PermissionEnum.Edit)]
         [HttpPost]
         public async Task<IActionResult> Delete(int userId)
         {
@@ -98,17 +103,17 @@ namespace CompanyManagementWeb.Controllers
                                                     DepartmentId = u.DepartmentId,
                                                     RoleId = u.RoleId,
                                                     Departments = new SelectList(
-                                                                        _context.Departments.Where(d => d.CompanyId == GetCompanyId()).ToList(),
-                                                                        "Id",
-                                                                        "Name",
-                                                                        u.DepartmentId ?? 0
-                                                                    ),
+                                                            _context.Departments.Where(d => d.CompanyId == GetCompanyId()).ToList(),
+                                                            "Id",
+                                                            "Name",
+                                                            u.DepartmentId ?? 0
+                                                        ),
                                                     Roles = new SelectList(
-                                                                    _context.Roles.Where(r => r.CompanyId == GetCompanyId()).ToList(),
-                                                                    "Id",
-                                                                    "Name",
-                                                                    u.RoleId ?? 0
-                                                                ),
+                                                            _context.Roles.Where(r => r.CompanyId == GetCompanyId()).ToList(),
+                                                            "Id",
+                                                            "Name",
+                                                            u.RoleId ?? 0
+                                                        ),
                                                 }).ToListAsync()
             };
 

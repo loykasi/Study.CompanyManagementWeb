@@ -1,21 +1,24 @@
 @model CompanyManagementWeb.ViewModels.CompanyCreateViewModel
 
 @{
-    ViewData["Title"] = "Create company";
+    ViewData["Title"] = "Tạo công ty";
 }
 
-<h1>Create</h1>
-
-<h4>PostCategory</h4>
+<h3>Tạo công ty</h3>
 <hr />
 <div class="row">
     <div class="col-md-4">
         <form asp-action="Create">
             <div asp-validation-summary="ModelOnly" class="text-danger"></div>
-            <div class="form-group">
-                <label asp-for="Name" class="control-label"></label>
+            <div class="form-group mb-2">
+                <label asp-for="Name" class="control-label my-2">Tên công ty *</label>
                 <input asp-for="Name" class="form-control" />
                 <span asp-validation-for="Name" class="text-danger"></span>
+            </div>
+            <div class="form-group mb-2">
+                <label asp-for="Address" class="control-label my-2">Địa chỉ *</label>
+                <input asp-for="Address" class="form-control" />
+                <span asp-validation-for="Address" class="text-danger"></span>
             </div>
             <div class="form-group">
                 <input type="submit" value="Create" class="btn btn-primary" />

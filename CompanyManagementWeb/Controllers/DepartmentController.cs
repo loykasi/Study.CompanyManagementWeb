@@ -4,6 +4,8 @@ using CompanyManagementWeb.DataAccess;
 using CompanyManagementWeb.Models;
 using CompanyManagementWeb.ViewModels;
 using CompanyManagementWeb.Attributes;
+using CompanyManagementWeb.Data;
+using Microsoft.AspNetCore.Http.HttpResults;
 
 namespace CompanyManagementWeb.Controllers
 {
@@ -17,128 +19,115 @@ namespace CompanyManagementWeb.Controllers
         }
 
         // GET: Department
-        [JwtAuthorizationFilter]
+        [JwtAuthorizationFilter(resource: ResourceEnum.Department, permission: PermissionEnum.View)]
         public async Task<IActionResult> Index()
         {
             int companyId = HttpContext.Session.GetInt32("companyId").Value;
             var departments = _context.Departments.Include(d => d.Company).Where(d => d.CompanyId == companyId);
-            return View(await departments.ToListAsync());
+            DepartmentViewModel departmentViewModel = new()
+            {
+                Departments = await departments.ToListAsync()
+            };
+            return View(departmentViewModel);
         }
 
-        // GET: Department/Create
-        [JwtAuthorizationFilter]
-        public IActionResult Create()
-        {
-            return View();
-        }
-
-        // POST: Department/Create
         [HttpPost]
-        [JwtAuthorizationFilter]
+        [JwtAuthorizationFilter(resource: ResourceEnum.Department, permission: PermissionEnum.Edit)]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Create(DepartmentCreateViewModel departmentCreateViewModel)
+        public async Task<IActionResult> Create(DepartmentViewModel departmentViewModel)
         {
             if (ModelState.IsValid)
             {
                 Department department = new()
                 {
-                    Name = departmentCreateViewModel.Name,
+                    Name = departmentViewModel.DepartmentCreateViewModel.Name,
                     CompanyId = HttpContext.Session.GetInt32("companyId").Value
                 };
                 _context.Add(department);
                 await _context.SaveChangesAsync();
-                return RedirectToAction(nameof(Index));
-            }
-            return View(departmentCreateViewModel);
-        }
 
-        // GET: Department/Edit/5
-        [JwtAuthorizationFilter]
-        public async Task<IActionResult> Edit(int? id)
-        {
-            if (id == null)
-            {
-                return NotFound();
+                int companyId = HttpContext.Session.GetInt32("companyId").Value;
+                var departments = _context.Departments.Include(d => d.Company).Where(d => d.CompanyId == companyId);
+                departmentViewModel.Departments = await departments.ToListAsync();
+                return PartialView("DepartmentListPartial", departmentViewModel);
             }
 
-            var department = await _context.Departments.FindAsync(id);
-            if (department == null)
-            {
-                return NotFound();
-            }
-            DepartmentCreateViewModel departmentCreateViewModel = new()
-            {
-                Id = department.Id,
-                Name = department.Name
-            };
-            return View(departmentCreateViewModel);
+            return NoContent();
         }
 
         // POST: Department/Edit/5
         [HttpPost]
-        [JwtAuthorizationFilter]
+        [JwtAuthorizationFilter(resource: ResourceEnum.Department, permission: PermissionEnum.Edit)]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Edit(DepartmentCreateViewModel departmentCreateViewModel)
+        public async Task<IActionResult> Edit(DepartmentViewModel departmentViewModel)
         {
             if (ModelState.IsValid)
             {
                 try
                 {
-                    var department = _context.Departments.FirstOrDefault(d => d.Id == departmentCreateViewModel.Id);
-                    department.Name = departmentCreateViewModel.Name;
+                    var department = _context.Departments.FirstOrDefault(d => d.Id == departmentViewModel.DepartmentCreateViewModel.Id);
+                    department.Name = departmentViewModel.DepartmentCreateViewModel.Name;
                     _context.Update(department);
                     await _context.SaveChangesAsync();
                 }
                 catch (DbUpdateConcurrencyException)
                 {
-                    if (!DepartmentExists(departmentCreateViewModel.Id))
+                    if (!DepartmentExists(departmentViewModel.DepartmentCreateViewModel.Id))
                     {
-                        return NotFound();
+                        return NoContent();
                     }
                     else
                     {
                         throw;
                     }
                 }
-                return RedirectToAction(nameof(Index));
+                
+                int companyId = HttpContext.Session.GetInt32("companyId").Value;
+                var departments = _context.Departments.Include(d => d.Company).Where(d => d.CompanyId == companyId);
+                departmentViewModel.Departments = await departments.ToListAsync();
+                return PartialView("DepartmentListPartial", departmentViewModel);
             }
-            return View(departmentCreateViewModel);
-        }
-
-        // GET: Department/Delete/5
-        [JwtAuthorizationFilter]
-        public async Task<IActionResult> Delete(int? id)
-        {
-            if (id == null)
-            {
-                return NotFound();
-            }
-
-            var department = await _context.Departments
-                .Include(d => d.Company)
-                .FirstOrDefaultAsync(m => m.Id == id);
-            if (department == null)
-            {
-                return NotFound();
-            }
-
-            return View(department);
+            return NoContent();
         }
 
         // POST: Department/Delete/5
-        [HttpPost, ActionName("Delete")]
-        [JwtAuthorizationFilter]
-        [ValidateAntiForgeryToken]
-        public async Task<IActionResult> DeleteConfirmed(int id)
+        [HttpPost]
+        [JwtAuthorizationFilter(resource: ResourceEnum.Department, permission: PermissionEnum.Edit)]
+        public async Task<IActionResult> Delete(int id)
         {
             var department = await _context.Departments.FindAsync(id);
             if (department != null)
             {
+                var posts = _context.Posts.Where(d => d.DepartmentId == department.Id);
+                foreach (var item in posts)
+                {
+                    item.DepartmentId = null;
+                }
+
+                var schedules = _context.Schedules.Where(d => d.DepartmentId == department.Id);
+                foreach (var item in schedules)
+                {
+                    item.DepartmentId = null;
+                }
+
+                var userCompanies = _context.UserCompanies.Where(d => d.DepartmentId == department.Id);
+                foreach (var item in userCompanies)
+                {
+                    item.DepartmentId = null;
+                }
+
                 _context.Departments.Remove(department);
             }
 
             await _context.SaveChangesAsync();
-            return RedirectToAction(nameof(Index));
+
+            int companyId = HttpContext.Session.GetInt32("companyId").Value;
+            var departments = _context.Departments.Include(d => d.Company).Where(d => d.CompanyId == companyId);
+            DepartmentViewModel departmentViewModel = new()
+            {
+                Departments = await departments.ToListAsync()
+            };
+            return PartialView("DepartmentListPartial", departmentViewModel);
         }
 
         private bool DepartmentExists(int id)

@@ -1,31 +1,35 @@
 ﻿@model CompanyManagementWeb.ViewModels.PostIndexViewModel
+@inject CompanyManagementWeb.Services.IUserService userService
 
 @{
     ViewData["Title"] = "Index";
 }
 
-<h1>Thông báo</h1>
-<p>
-    <a asp-action="Create">Create New</a>
-</p>
+<div class="d-flex justify-content-between my-3">
+    <h2 class="m-0 align-bottom">Bài đăng</h2>
+    @if (await userService.IsInPermission("Post", "Edit"))
+    {
+        <a class="m-0 align-bottom btn btn-secondary" asp-action="Create">Tạo bài đăng</a>
+    }
+</div>
 
-<div class="row">
-    <div class="col-md-12">
-        <form asp-action="Search">
-            <div class="form-group">
-                <label asp-for="SearchValue" class="control-label">Search</label>
+<div class="card">
+    <div class="col-md-12 card-body">
+        <form id="searchForm" asp-action="Search" class="row">
+            <div class="form-group mb-2">
+                <label asp-for="SearchValue" class="control-label mb-2">Tìm kiếm</label>
                 <input asp-for="SearchValue" class="form-control" />
             </div>
-            <div class="form-group">
-                <label asp-for="FromDate" class="control-label">From date</label>
+            <div class="col-md-6 form-group mb-2">
+                <label asp-for="FromDate" class="control-label mb-2">Từ ngày</label>
                 <input asp-for="FromDate" type="datetime-local" class="form-control" />
             </div>
-            <div class="form-group">
-                <label asp-for="ToDate" class="control-label">To date</label>
+            <div class="col-md-6 form-group mb-2">
+                <label asp-for="ToDate" class="control-label mb-2">Đến ngày</label>
                 <input asp-for="ToDate" type="datetime-local" class="form-control" />
             </div>
-            <div class="form-group">
-                <label asp-for="DepartmentId" class="control-label">Department</label>
+            <div class="col-md-6 form-group mb-2">
+                <label asp-for="DepartmentId" class="control-label mb-2">Phòng ban</label>
                 <select asp-for="DepartmentId" class ="form-control">
                     <option value="">All</option>
                     @foreach (var item in Model.Departments)
@@ -34,24 +38,47 @@
                     }
                 </select>
             </div>
+            <div class="col-md-6 form-group mb-2">
+                <label asp-for="CategoryId" class="control-label mb-2">Phòng ban</label>
+                <select asp-for="CategoryId" class ="form-control">
+                    <option value="">All</option>
+                    @foreach (var item in Model.Categories)
+                    {
+                        <option value="@item.Value">@item.Text</option>
+                    }
+                </select>
+            </div>
             <div class="form-group">
-                <input type="submit" value="Search" class="btn btn-primary" />
+                <input type="submit" value="Tìm kiếm" class="btn btn-primary" />
             </div>
         </form>
     </div>
 </div>
 
-@foreach (var item in Model.Posts)
-{
-    <div class="border mt-5">
-        <div>@item.Title</div>
-        <div>@item.Description</div>
-        @* <div>@Html.Raw(item.Content)</div> *@
-        <div>@item.CreatedDate</div>
-        <div>@item.CategoryName</div>
-        <div>@item.DepartmentName</div>
-        <div>@item.EmployeeName</div>
-        <a asp-action="Details" asp-route-id="@item.Id">Details</a>
-        <a asp-action="Edit" asp-route-id="@item.Id">Edit</a>
-    </div>
+<div id="postList">
+    <partial name="PostListPartial" model="Model" />
+</div>
+
+@section Scripts {
+    <script>
+        $("#searchForm").submit(function(e) {
+            e.preventDefault();
+            console.log("search");
+
+            var form = $(this);
+            var actionUrl = form.attr('action');
+
+            $.ajax({
+                type: 'GET',
+                url: actionUrl,
+                data: form.serialize(),
+                success: function (response) {
+                    $('#postList').html(response);
+                },
+                error: function (response, status, error) {
+                    console.log(status);
+                },
+            });
+        });
+    </script>
 }

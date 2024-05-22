@@ -8,6 +8,8 @@ using Microsoft.EntityFrameworkCore;
 using CompanyManagementWeb.DataAccess;
 using CompanyManagementWeb.Models;
 using CompanyManagementWeb.ViewModels;
+using CompanyManagementWeb.Attributes;
+using CompanyManagementWeb.Data;
 
 namespace CompanyManagementWeb.Controllers
 {
@@ -21,138 +23,103 @@ namespace CompanyManagementWeb.Controllers
         }
 
         // GET: PostCategorie
+        [JwtAuthorizationFilter(resource: ResourceEnum.PostCategory, permission: PermissionEnum.View)]
         public async Task<IActionResult> Index()
         {
             int companyId = HttpContext.Session.GetInt32("companyId").Value;
             var PostCategories = _context.PostCategories.Where(d => d.CompanyId == companyId);
-            return View(await PostCategories.ToListAsync());
-        }
-
-        // GET: PostCategorie/Details/5
-        public async Task<IActionResult> Details(int? id)
-        {
-            if (id == null)
+            PostCategoryViewModel postCategoryViewModel = new()
             {
-                return NotFound();
-            }
-
-            var postCategory = await _context.PostCategories
-                .FirstOrDefaultAsync(m => m.Id == id);
-            if (postCategory == null)
-            {
-                return NotFound();
-            }
-
-            return View(postCategory);
-        }
-
-        // GET: PostCategorie/Create
-        public IActionResult Create()
-        {
-            return View();
+                PostCategories = await PostCategories.ToListAsync()
+            };
+            return View(postCategoryViewModel);
         }
 
         // POST: PostCategorie/Create
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Create(PostCategoryCreateViewModel postCategoryCreateViewModel)
+        [JwtAuthorizationFilter(resource: ResourceEnum.PostCategory, permission: PermissionEnum.Edit)]
+        public async Task<IActionResult> Create(PostCategoryViewModel postCategoryViewModel)
         {
             if (ModelState.IsValid)
             {
                 PostCategory postCategory = new()
                 {
-                    Name = postCategoryCreateViewModel.Name,
+                    Name = postCategoryViewModel.PostCategoryCreateViewModel.Name,
                     CompanyId = HttpContext.Session.GetInt32("companyId").Value
                 };
                 _context.Add(postCategory);
                 await _context.SaveChangesAsync();
-                return RedirectToAction(nameof(Index));
-            }
-            return View(postCategoryCreateViewModel);
-        }
 
-        // GET: PostCategorie/Edit/5
-        public async Task<IActionResult> Edit(int? id)
-        {
-            if (id == null)
-            {
-                return NotFound();
+                int companyId = HttpContext.Session.GetInt32("companyId").Value;
+                var PostCategories = _context.PostCategories.Where(d => d.CompanyId == companyId);
+                postCategoryViewModel.PostCategories = await PostCategories.ToListAsync();
+                return PartialView("PostCategoryListPartial", postCategoryViewModel);
             }
-
-            var postCategory = await _context.PostCategories.FindAsync(id);
-            if (postCategory == null)
-            {
-                return NotFound();
-            }
-            PostCategoryCreateViewModel postCategoryCreateViewModel = new()
-            {
-                Id = postCategory.Id,
-                Name = postCategory.Name,
-            };
-            return View(postCategoryCreateViewModel);
+            return NoContent();
         }
 
         // POST: PostCategorie/Edit/5
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Edit(PostCategoryCreateViewModel postCategoryCreateViewModel)
+        [JwtAuthorizationFilter(resource: ResourceEnum.PostCategory, permission: PermissionEnum.Edit)]
+        public async Task<IActionResult> Edit(PostCategoryViewModel postCategoryViewModel)
         {
             if (ModelState.IsValid)
             {
                 try
                 {
-                    var postCategory = _context.PostCategories.FirstOrDefault(d => d.Id == postCategoryCreateViewModel.Id);
-                    postCategory.Name = postCategoryCreateViewModel.Name;
+                    var postCategory = _context.PostCategories.FirstOrDefault(d => d.Id == postCategoryViewModel.PostCategoryCreateViewModel.Id);
+                    postCategory.Name = postCategoryViewModel.PostCategoryCreateViewModel.Name;
                     _context.Update(postCategory);
                     await _context.SaveChangesAsync();
                 }
                 catch (DbUpdateConcurrencyException)
                 {
-                    if (!PostCategoryExists(postCategoryCreateViewModel.Id))
+                    if (!PostCategoryExists(postCategoryViewModel.PostCategoryCreateViewModel.Id))
                     {
-                        return NotFound();
+                        return NoContent();
                     }
                     else
                     {
                         throw;
                     }
                 }
-                return RedirectToAction(nameof(Index));
+                
+                int companyId = HttpContext.Session.GetInt32("companyId").Value;
+                var PostCategories = _context.PostCategories.Where(d => d.CompanyId == companyId);
+                postCategoryViewModel.PostCategories = await PostCategories.ToListAsync();
+                return PartialView("PostCategoryListPartial", postCategoryViewModel);
             }
-            return View(postCategoryCreateViewModel);
-        }
-
-        // GET: PostCategorie/Delete/5
-        public async Task<IActionResult> Delete(int? id)
-        {
-            if (id == null)
-            {
-                return NotFound();
-            }
-
-            var postCategory = await _context.PostCategories
-                .FirstOrDefaultAsync(m => m.Id == id);
-            if (postCategory == null)
-            {
-                return NotFound();
-            }
-
-            return View(postCategory);
+            return NoContent();
         }
 
         // POST: PostCategorie/Delete/5
-        [HttpPost, ActionName("Delete")]
-        [ValidateAntiForgeryToken]
-        public async Task<IActionResult> DeleteConfirmed(int id)
+        [HttpPost]
+        [JwtAuthorizationFilter(resource: ResourceEnum.PostCategory, permission: PermissionEnum.Edit)]
+        public async Task<IActionResult> Delete(int id)
         {
             var postCategory = await _context.PostCategories.FindAsync(id);
             if (postCategory != null)
             {
+                var posts = _context.Posts.Where(d => d.PostCategoryId == postCategory.Id);
+                foreach (var item in posts)
+                {
+                    item.PostCategoryId = null;
+                }
+
                 _context.PostCategories.Remove(postCategory);
             }
 
             await _context.SaveChangesAsync();
-            return RedirectToAction(nameof(Index));
+
+            int companyId = HttpContext.Session.GetInt32("companyId").Value;
+            var PostCategories = _context.PostCategories.Where(d => d.CompanyId == companyId);
+            PostCategoryViewModel postCategoryViewModel = new()
+            {
+                PostCategories = await PostCategories.ToListAsync()
+            };
+            return PartialView("PostCategoryListPartial", postCategoryViewModel);
         }
 
         private bool PostCategoryExists(int id)

@@ -21,7 +21,7 @@ namespace CompanyManagementWeb.Controllers
         }
 
         // GET: UploadPost
-        [JwtAuthorizationFilter(resource: ResourceEnum.Post, permission: PermissionEnum.Edit)]
+        [JwtAuthorizationFilter(resource: ResourceEnum.Post, permission: PermissionEnum.View)]
         public async Task<IActionResult> Index()
         {
             PostIndexViewModel postIndexViewModel = new()
@@ -30,10 +30,10 @@ namespace CompanyManagementWeb.Controllers
             };
 
             
-            var schedules = _context.Posts.Include(s => s.PostCategory)
+            var schedules = await _context.Posts.Include(s => s.PostCategory)
                                             .Include(s => s.Employee)
                                             .Include(s => s.Department)
-                                            .Where(d => d.PostCategory.CompanyId == GetCompanyId());;
+                                            .Where(d => d.CompanyId == GetCompanyId()).ToListAsync();
             foreach (var item in schedules)
             {
                 postIndexViewModel.Posts.Add(new PostViewModel
@@ -54,13 +54,18 @@ namespace CompanyManagementWeb.Controllers
                                                                                 Value = d.Id.ToString(),
                                                                                 Text = d.Name
                                                                             });
+            postIndexViewModel.Categories = _context.PostCategories.Select(d => new SelectListItem
+                                                                            {
+                                                                                Value = d.Id.ToString(),
+                                                                                Text = d.Name
+                                                                            });
             return View(postIndexViewModel);
         }
 
-        [JwtAuthorizationFilter]
+        [JwtAuthorizationFilter(resource: ResourceEnum.Post, permission: PermissionEnum.View)]
         public async Task<IActionResult> Search(PostIndexViewModel postIndexViewModel)
         {
-            IQueryable<Post> posts = _context.Posts;
+            IQueryable<Post> posts = _context.Posts.Where(d => d.CompanyId == GetCompanyId());
 
             if (!postIndexViewModel.SearchValue.IsNullOrEmpty())
             {
@@ -69,6 +74,10 @@ namespace CompanyManagementWeb.Controllers
             if (postIndexViewModel.DepartmentId != null)
             {
                 posts = posts.Where(p => p.DepartmentId == postIndexViewModel.DepartmentId);
+            }
+            if (postIndexViewModel.CategoryId != null)
+            {
+                posts = posts.Where(p => p.PostCategoryId == postIndexViewModel.CategoryId);
             }
             if (postIndexViewModel.FromDate != null)
             {
@@ -96,16 +105,11 @@ namespace CompanyManagementWeb.Controllers
                     });
             }
 
-            postIndexViewModel.Departments = _context.Departments.Select(d => new SelectListItem
-                                                                            {
-                                                                                Value = d.Id.ToString(),
-                                                                                Text = d.Name
-                                                                            });
-            return View("Index", postIndexViewModel);
+            return PartialView("PostListPartial", postIndexViewModel);
         }
 
         // GET: UploadPost/Details/5
-        [JwtAuthorizationFilter]
+        [JwtAuthorizationFilter(resource: ResourceEnum.Post, permission: PermissionEnum.View)]
         public async Task<IActionResult> Details(int? id)
         {
             if (id == null)
@@ -139,7 +143,7 @@ namespace CompanyManagementWeb.Controllers
         }
 
         // GET: UploadPost/Create
-        [JwtAuthorizationFilter]
+        [JwtAuthorizationFilter(resource: ResourceEnum.Post, permission: PermissionEnum.Edit)]
         public IActionResult Create()
         {
             PostCreateViewModel postCreateViewModel = new()
@@ -152,14 +156,14 @@ namespace CompanyManagementWeb.Controllers
 
         // POST: UploadPost/Create
         [HttpPost]
-        [JwtAuthorizationFilter]
+        [JwtAuthorizationFilter(resource: ResourceEnum.Post, permission: PermissionEnum.Edit)]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Create(PostCreateViewModel postViewModel)
         {
             if (ModelState.IsValid)
             {
                 // To do: get current user ID
-                int employeeId = 1;
+                int employeeId = GetUserId();
 
                 Post post = new Post
                 {
@@ -170,6 +174,7 @@ namespace CompanyManagementWeb.Controllers
                     PostCategoryId = postViewModel.CategoryID.Value,
                     DepartmentId = postViewModel.DepartmentId,
                     EmployeeId = employeeId,
+                    CompanyId = GetCompanyId()
                     // CompanyId = HttpContext.Session.GetInt32(SessionVariable.CompanyId).Value
                 };
 
@@ -182,7 +187,7 @@ namespace CompanyManagementWeb.Controllers
         }
 
         // GET: UploadPost/Edit/5
-        [JwtAuthorizationFilter]
+        [JwtAuthorizationFilter(resource: ResourceEnum.Post, permission: PermissionEnum.Edit)]
         public async Task<IActionResult> Edit(int? id)
         {
             if (id == null)
@@ -213,7 +218,7 @@ namespace CompanyManagementWeb.Controllers
 
         // POST: UploadPost/Edit/5
         [HttpPost]
-        [JwtAuthorizationFilter]
+        [JwtAuthorizationFilter(resource: ResourceEnum.Post, permission: PermissionEnum.Edit)]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Edit(PostCreateViewModel postViewModel)
         {
@@ -253,7 +258,7 @@ namespace CompanyManagementWeb.Controllers
         }
 
         // GET: UploadPost/Delete/5
-        [JwtAuthorizationFilter]
+        [JwtAuthorizationFilter(resource: ResourceEnum.Post, permission: PermissionEnum.Edit)]
         public async Task<IActionResult> Delete(int? id)
         {
             if (id == null)
@@ -288,7 +293,7 @@ namespace CompanyManagementWeb.Controllers
 
         // POST: UploadPost/Delete/5
         [HttpPost, ActionName("Delete")]
-        [JwtAuthorizationFilter]
+        [JwtAuthorizationFilter(resource: ResourceEnum.Post, permission: PermissionEnum.Edit)]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> DeleteConfirmed(int id)
         {
@@ -310,6 +315,11 @@ namespace CompanyManagementWeb.Controllers
         private int GetCompanyId()
         {
             return HttpContext.Session.GetInt32(SessionVariable.CompanyId).Value;
+        }
+
+        private int GetUserId()
+        {
+            return HttpContext.Session.GetInt32(SessionVariable.UserId).Value;
         }
     }
 }

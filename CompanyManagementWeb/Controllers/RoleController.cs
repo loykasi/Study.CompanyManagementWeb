@@ -5,6 +5,7 @@ using CompanyManagementWeb.DataAccess;
 using CompanyManagementWeb.Models;
 using CompanyManagementWeb.ViewModels;
 using CompanyManagementWeb.Data;
+using CompanyManagementWeb.Attributes;
 
 namespace CompanyManagementWeb.Controllers
 {
@@ -20,6 +21,7 @@ namespace CompanyManagementWeb.Controllers
         }
 
         // GET: Role
+        [JwtAuthorizationFilter(resource: ResourceEnum.Role, permission: PermissionEnum.View)]
         public async Task<IActionResult> Index()
         {
             RoleIndexViewModel roleIndexViewModel = new()
@@ -34,13 +36,14 @@ namespace CompanyManagementWeb.Controllers
                 {
                     Id = role.Id,
                     Name = role.Name,
+                    IsAdmin = role.IsAdmin,
                     RoleDetails = await _context.RolePermissions.Include(r => r.Resource)
                                                             .Include(r => r.Permission)
                                                             .Where(r => r.RoleId == role.Id)
                                                             .Select(r => new RoleDetailViewModel
                                                             {
-                                                                Resource = r.Resource.Name,
-                                                                Permission = r.Permission.Name
+                                                                Resource = ResourceVariable.GetLocalizedName(r.Resource.Name),
+                                                                Permission = PermissionVariable.GetLocalizedName(r.Permission.Name)
                                                             }).ToListAsync()
                 };
                 roleIndexViewModel.Roles.Add(roleViewModel);
@@ -50,6 +53,7 @@ namespace CompanyManagementWeb.Controllers
         }
 
         // GET: Role/Create
+        [JwtAuthorizationFilter(resource: ResourceEnum.Role, permission: PermissionEnum.Edit)]
         public async Task<IActionResult> Create()
         {
             RoleCreateViewModel roleCreateViewModel = new()
@@ -57,8 +61,16 @@ namespace CompanyManagementWeb.Controllers
                 RoleDetails = await _context.Resources.Select(r => new RoleDetailCreateViewModel
                 {
                     ResourceId = r.Id,
-                    Resource = r.Name,
-                    Permissions = new SelectList(_context.Permissions, "Id", "Name")
+                    Resource = ResourceVariable.GetLocalizedName(r.Name),
+                    Permissions = new SelectList(
+                                        _context.Permissions.Select(p => new
+                                            {
+                                                Id = p.Id,
+                                                Name = PermissionVariable.GetLocalizedName(p.Name)
+                                            }).ToList(), 
+                                        "Id", 
+                                        "Name"
+                                    )
                 }).ToListAsync()
             };
             return View(roleCreateViewModel);
@@ -67,6 +79,7 @@ namespace CompanyManagementWeb.Controllers
         // POST: Role/Create
         [HttpPost]
         [ValidateAntiForgeryToken]
+        [JwtAuthorizationFilter(resource: ResourceEnum.Role, permission: PermissionEnum.Edit)]
         public async Task<IActionResult> Create(RoleCreateViewModel roleCreateViewModel)
         {
             if (ModelState.IsValid)
@@ -74,7 +87,8 @@ namespace CompanyManagementWeb.Controllers
                 Role role = new()
                 {
                     Name = roleCreateViewModel.Name,
-                    CompanyId = GetCompanyId()
+                    CompanyId = GetCompanyId(),
+                    IsAdmin = roleCreateViewModel.IsAdmin
                 };
                 _context.Add(role);
                 await _context.SaveChangesAsync();
@@ -97,12 +111,21 @@ namespace CompanyManagementWeb.Controllers
                 {
                     ResourceId = r.Id,
                     Resource = r.Name,
-                    Permissions = new SelectList(_context.Permissions, "Id", "Name")
+                    Permissions = new SelectList(
+                                        _context.Permissions.Select(p => new
+                                            {
+                                                Id = p.Id,
+                                                Name = PermissionVariable.GetLocalizedName(p.Name)
+                                            }).ToList(), 
+                                        "Id", 
+                                        "Name"
+                                    )
                 }).ToListAsync();
             return View(roleCreateViewModel);
         }
 
         // GET: Role/Edit/5
+        [JwtAuthorizationFilter(resource: ResourceEnum.Role, permission: PermissionEnum.Edit)]
         public async Task<IActionResult> Edit(int? id)
         {
             if (id == null)
@@ -120,21 +143,50 @@ namespace CompanyManagementWeb.Controllers
             {
                 Id = role.Id,
                 Name = role.Name,
-                RoleDetails = new List<RoleDetailCreateViewModel>()
+                IsAdmin = role.IsAdmin,
             };
 
-            var rolePermissions = await _context.RolePermissions.Where(r => r.RoleId == role.Id).ToListAsync();
-            foreach (var item in rolePermissions)
+            if (role.IsAdmin)
             {
-                var resource = _context.Resources.FirstOrDefault(r => r.Id == item.ResourceId);
-                var permission = _context.Permissions.FirstOrDefault(p => p.Id == item.PermissionId);
-                roleCreateViewModel.RoleDetails.Add(new RoleDetailCreateViewModel
+                roleCreateViewModel.RoleDetails = await _context.Resources.Select(r => new RoleDetailCreateViewModel
+                    {
+                        ResourceId = r.Id,
+                        Resource = ResourceVariable.GetLocalizedName(r.Name),
+                        Permissions = new SelectList(
+                                        _context.Permissions.Select(p => new
+                                            {
+                                                Id = p.Id,
+                                                Name = PermissionVariable.GetLocalizedName(p.Name)
+                                            }).ToList(), 
+                                        "Id", 
+                                        "Name"
+                                    )
+                    }).ToListAsync();
+            }
+            else
+            {
+                roleCreateViewModel.RoleDetails = [];
+                var rolePermissions = await _context.RolePermissions.Where(r => r.RoleId == role.Id).ToListAsync();
+                foreach (var item in rolePermissions)
                 {
-                    ResourceId = resource.Id,
-                    Resource = resource.Name,
-                    PermissionId = permission.Id,
-                    Permissions = new SelectList(_context.Permissions, "Id", "Name", permission.Id)
-                });
+                    var resource = _context.Resources.FirstOrDefault(r => r.Id == item.ResourceId);
+                    var permission = _context.Permissions.FirstOrDefault(p => p.Id == item.PermissionId);
+                    roleCreateViewModel.RoleDetails.Add(new RoleDetailCreateViewModel
+                    {
+                        ResourceId = resource.Id,
+                        Resource = ResourceVariable.GetLocalizedName(resource.Name),
+                        PermissionId = permission.Id,
+                        Permissions = new SelectList(
+                                        _context.Permissions.Select(p => new
+                                            {
+                                                Id = p.Id,
+                                                Name = PermissionVariable.GetLocalizedName(p.Name)
+                                            }).ToList(), 
+                                        "Id", 
+                                        "Name"
+                                    )
+                    });
+                }
             }
             
             return View(roleCreateViewModel);
@@ -143,6 +195,7 @@ namespace CompanyManagementWeb.Controllers
         // POST: Role/Edit/5
         [HttpPost]
         [ValidateAntiForgeryToken]
+        [JwtAuthorizationFilter(resource: ResourceEnum.Role, permission: PermissionEnum.Edit)]
         public async Task<IActionResult> Edit(RoleCreateViewModel roleCreateViewModel)
         {
             if (ModelState.IsValid)
@@ -151,15 +204,32 @@ namespace CompanyManagementWeb.Controllers
                 {
                     var role = await _context.Roles.FindAsync(roleCreateViewModel.Id);
                     role.Name = roleCreateViewModel.Name;
+                    role.IsAdmin = roleCreateViewModel.IsAdmin;
                     await _context.SaveChangesAsync();
 
-                    var rolePermissions = _context.RolePermissions.Where(r => r.RoleId == roleCreateViewModel.Id);
-
-                    foreach (var item in roleCreateViewModel.RoleDetails)
+                    if (_context.RolePermissions.Any(r => r.RoleId == roleCreateViewModel.Id))
                     {
-                        var detail = rolePermissions.FirstOrDefault(r => r.ResourceId == item.ResourceId);
-                        detail.PermissionId = item.PermissionId;
+                        var rolePermissions = _context.RolePermissions.Where(r => r.RoleId == roleCreateViewModel.Id);
+                        foreach (var item in roleCreateViewModel.RoleDetails)
+                        {
+                            var detail = rolePermissions.FirstOrDefault(r => r.ResourceId == item.ResourceId);
+                            detail.PermissionId = item.PermissionId;
+                        }
                     }
+                    else
+                    {
+                        foreach (var item in roleCreateViewModel.RoleDetails)
+                        {
+                            RolePermission rolePermission = new()
+                            {
+                                RoleId = roleCreateViewModel.Id.Value,
+                                ResourceId = item.ResourceId,
+                                PermissionId = item.PermissionId
+                            };
+                            _context.Add(rolePermission);
+                        }
+                    }
+                    
                     await _context.SaveChangesAsync();
                 }
                 catch (DbUpdateConcurrencyException)
@@ -181,6 +251,7 @@ namespace CompanyManagementWeb.Controllers
         }
 
         // GET: Role/Delete/5
+        [JwtAuthorizationFilter(resource: ResourceEnum.Role, permission: PermissionEnum.Edit)]
         public async Task<IActionResult> Delete(int? id)
         {
             if (id == null)
@@ -202,6 +273,7 @@ namespace CompanyManagementWeb.Controllers
         // POST: Role/Delete/5
         [HttpPost, ActionName("Delete")]
         [ValidateAntiForgeryToken]
+        [JwtAuthorizationFilter(resource: ResourceEnum.Role, permission: PermissionEnum.Edit)]
         public async Task<IActionResult> DeleteConfirmed(int id)
         {
             var role = await _context.Roles.FindAsync(id);

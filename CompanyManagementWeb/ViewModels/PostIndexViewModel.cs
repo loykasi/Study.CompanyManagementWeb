@@ -6,9 +6,11 @@ namespace CompanyManagementWeb.ViewModels
     {
         public List<PostViewModel> Posts { get; set; }
         public IEnumerable<SelectListItem> Departments { get; set; }
+        public IEnumerable<SelectListItem> Categories { get; set; }
 
         public string? SearchValue { get; set; }
         public int? DepartmentId { get; set; }
+        public int? CategoryId { get; set; }
         public DateTime? FromDate { get; set; }
         public DateTime? ToDate { get; set; }
     }

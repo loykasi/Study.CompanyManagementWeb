@@ -1,21 +1,29 @@
+@model CompanyManagementWeb.ViewModels.CompanyJoinViewModel
+
 @{
-    ViewData["Title"] = "Join company";
+    ViewData["Title"] = "Vào công ty";
 }
 
-<h1>Create</h1>
-
-<h4>PostCategory</h4>
+<h3>Vào công ty</h3>
 <hr />
 <div class="row">
     <div class="col-md-4">
         <form asp-action="Join">
             <div asp-validation-summary="ModelOnly" class="text-danger"></div>
-            <div class="form-group">
-                <label for="code" class="control-label">Invite code</label>
-                <input name="code" class="form-control" />
+            <div class="form-group mb-2">
+                <label asp-for="Code" class="control-label my-2">Mã mời</label>
+                <input asp-for="Code" class="form-control" />
+                @* <span asp-validation-for="Code" class="text-danger"></span> *@
+                @{
+                    var codeError = ViewData.ModelState["CodeError"]?.Errors.FirstOrDefault()?.ErrorMessage;
+                }
+                @if (!string.IsNullOrEmpty(codeError))
+                {
+                    <span class="text-danger">@codeError</span>
+                }
             </div>
             <div class="form-group">
-                <input type="submit" value="Join" class="btn btn-primary" />
+                <input type="submit" value="Tham gia" class="btn btn-primary" />
             </div>
         </form>
     </div>

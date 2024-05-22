@@ -2,11 +2,9 @@ using System.ComponentModel.DataAnnotations;
 
 namespace CompanyManagementWeb.ViewModels
 {
-    public class DepartmentCreateViewModel
+    public class CompanyJoinViewModel
     {
-        public int Id { get; set; }
-
         [Required]
-        public string? Name { get; set; }
+        public string? Code { get; set; }
     }
 }

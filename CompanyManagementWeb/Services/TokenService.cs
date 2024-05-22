@@ -4,6 +4,7 @@ using System.Security.Cryptography;
 using System.Text;
 using CompanyManagementWeb.DataAccess;
 using CompanyManagementWeb.Models;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
 
 namespace CompanyManagementWeb.Services
@@ -118,9 +119,9 @@ namespace CompanyManagementWeb.Services
             }
         }
 
-        public bool IsRefreshTokenValid(string refreshToken)
+        public async Task<bool> IsRefreshTokenValid(string refreshToken)
         {
-            var user = _context.Users.FirstOrDefault(u => u.RefreshToken == refreshToken);
+            var user = await _context.Users.FirstOrDefaultAsync(u => u.RefreshToken == refreshToken);
             if (user == null)
                 return false;
             return true;
@@ -136,7 +137,7 @@ namespace CompanyManagementWeb.Services
             httpContext.Response.Cookies.Append("jwtCookie", token, cookieOptions);
         }
 
-        public void SetRefreshTokenCookie(HttpContext httpContext, int id, string token)
+        public async void SetRefreshTokenCookie(HttpContext httpContext, int id, string token)
         {
             var cookieOptions = new CookieOptions
             {
@@ -145,7 +146,7 @@ namespace CompanyManagementWeb.Services
             };
             httpContext.Response.Cookies.Append("refreshTokenCookie", token, cookieOptions);
 
-            var user = _context.Users.FirstOrDefault(u => u.Id == id);
+            var user = await _context.Users.FirstOrDefaultAsync(u => u.Id == id);
             user.RefreshToken = token;
             _context.SaveChanges();
         }
