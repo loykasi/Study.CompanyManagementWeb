@@ -78,6 +78,7 @@ namespace CompanyManagementWeb.Controllers
             var company = _context.Companies.FirstOrDefault(c => c.Code == companyJoinViewModel.Code);
             if (company == null)
             {
+                ModelState.AddModelError("CodeError", "Sai mã mời");
                 return View();
             }
 

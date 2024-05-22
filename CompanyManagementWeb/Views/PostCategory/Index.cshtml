@@ -53,7 +53,7 @@
         <div class="modal-body">
             <div class="mb-3">
                 <label asp-for="PostCategoryCreateViewModel.Name" class="col-form-label">Danh mục:</label>
-                <input asp-for="PostCategoryCreateViewModel.Name" class="form-control" />
+                <input id="createInputField" asp-for="PostCategoryCreateViewModel.Name" class="form-control" />
                 <span asp-validation-for="PostCategoryCreateViewModel.Name" class="text-danger"></span>
             </div>
         </div>
@@ -93,6 +93,7 @@
     <script>
         const hiddenidField = document.getElementById("hiddenIdField");
         const editInputField = document.getElementById("editInputField");
+        const createInputField = document.getElementById("createInputField");
         
         function deleteCategory(id) {
             $.ajax({
@@ -118,6 +119,7 @@
         }
 
         function openCreateModal() {
+            createInputField.value = "";
             $('#createModal').modal('show');
         }
 

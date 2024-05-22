@@ -102,6 +102,12 @@ namespace CompanyManagementWeb.Controllers
             var postCategory = await _context.PostCategories.FindAsync(id);
             if (postCategory != null)
             {
+                var posts = _context.Posts.Where(d => d.PostCategoryId == postCategory.Id);
+                foreach (var item in posts)
+                {
+                    item.PostCategoryId = null;
+                }
+
                 _context.PostCategories.Remove(postCategory);
             }
 

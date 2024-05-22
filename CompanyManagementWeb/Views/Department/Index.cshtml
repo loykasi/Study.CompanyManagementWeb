@@ -54,7 +54,7 @@
         <div class="modal-body">
             <div class="mb-3">
                 <label asp-for="DepartmentCreateViewModel.Name" class="col-form-label">Phòng ban:</label>
-                <input asp-for="DepartmentCreateViewModel.Name" class="form-control" />
+                <input id="createInputField" asp-for="DepartmentCreateViewModel.Name" class="form-control" />
                 <span asp-validation-for="DepartmentCreateViewModel.Name" class="text-danger"></span>
             </div>
         </div>
@@ -94,6 +94,7 @@
     <script>
         const hiddenidField = document.getElementById("hiddenIdField");
         const editInputField = document.getElementById("editInputField");
+        const createInputField = document.getElementById("createInputField");
 
         function deleteDepartment(id) {
             $.ajax({
@@ -119,6 +120,7 @@
         }
 
         function openCreateModal() {
+            createInputField.value = "";
             $('#createModal').modal('show');
         }
 

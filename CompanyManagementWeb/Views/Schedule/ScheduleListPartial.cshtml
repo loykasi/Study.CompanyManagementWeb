@@ -32,8 +32,8 @@
                 @if (await userService.IsInPermission("Schedule", "Edit"))
                 {
                     <div class="card-footer">
-                        <a asp-action="Details" asp-route-id="@item.Id" class="btn btn-primary">Chỉnh sửa</a>
-                        <a asp-action="Edit" asp-route-id="@item.Id" class="btn btn-primary">Xóa</a>
+                        <a asp-action="Edit" asp-route-id="@item.Id" class="btn btn-primary">Chỉnh sửa</a>
+                        <a asp-action="Delete" asp-route-id="@item.Id" class="btn btn-primary">Xóa</a>
                     </div>
                 }
             </div>

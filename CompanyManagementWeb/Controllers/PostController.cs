@@ -33,7 +33,7 @@ namespace CompanyManagementWeb.Controllers
             var schedules = await _context.Posts.Include(s => s.PostCategory)
                                             .Include(s => s.Employee)
                                             .Include(s => s.Department)
-                                            .Where(d => d.PostCategory.CompanyId == GetCompanyId()).ToListAsync();
+                                            .Where(d => d.CompanyId == GetCompanyId()).ToListAsync();
             foreach (var item in schedules)
             {
                 postIndexViewModel.Posts.Add(new PostViewModel
@@ -60,7 +60,7 @@ namespace CompanyManagementWeb.Controllers
         [JwtAuthorizationFilter(resource: ResourceEnum.Post, permission: PermissionEnum.View)]
         public async Task<IActionResult> Search(PostIndexViewModel postIndexViewModel)
         {
-            IQueryable<Post> posts = _context.Posts.Where(d => d.PostCategory.CompanyId == GetCompanyId());
+            IQueryable<Post> posts = _context.Posts.Where(d => d.CompanyId == GetCompanyId());
 
             if (!postIndexViewModel.SearchValue.IsNullOrEmpty())
             {
@@ -154,7 +154,7 @@ namespace CompanyManagementWeb.Controllers
             if (ModelState.IsValid)
             {
                 // To do: get current user ID
-                int employeeId = 1;
+                int employeeId = GetUserId();
 
                 Post post = new Post
                 {
@@ -165,6 +165,7 @@ namespace CompanyManagementWeb.Controllers
                     PostCategoryId = postViewModel.CategoryID.Value,
                     DepartmentId = postViewModel.DepartmentId,
                     EmployeeId = employeeId,
+                    CompanyId = GetCompanyId()
                     // CompanyId = HttpContext.Session.GetInt32(SessionVariable.CompanyId).Value
                 };
 
@@ -305,6 +306,11 @@ namespace CompanyManagementWeb.Controllers
         private int GetCompanyId()
         {
             return HttpContext.Session.GetInt32(SessionVariable.CompanyId).Value;
+        }
+
+        private int GetUserId()
+        {
+            return HttpContext.Session.GetInt32(SessionVariable.UserId).Value;
         }
     }
 }

@@ -96,7 +96,7 @@ namespace CompanyManagementWeb.Middlewares
                 if (userCompany != null)
                 {
                     context.Session.SetInt32("companyId", userCompany.CompanyId);
-                    context.Session.SetString("companyId", userCompany.Company.Name);
+                    context.Session.SetString("companyName", userCompany.Company.Name);
                 }
 
                 await _next.Invoke(context);

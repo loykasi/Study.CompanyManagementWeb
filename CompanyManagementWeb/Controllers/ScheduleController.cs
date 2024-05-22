@@ -213,8 +213,14 @@ namespace CompanyManagementWeb.Controllers
         {   
             if (ModelState.IsValid)
             {
+                if (scheduleViewModel.EndTime.Value < scheduleViewModel.StartTime.Value)
+                {
+                    ModelState.AddModelError("DateError", "Thời gian kết thúc phải sau thời gian bắt đầu");
+                    scheduleViewModel.Departments = new SelectList(_context.Departments.Where(d => d.CompanyId == GetCompanyId()), "Id", "Name");
+                    return View(scheduleViewModel);
+                }
                 // To do: get current user ID
-                int employeeId = 1;
+                int employeeId = GetUserId();
 
                 Schedule schedule = new()
                 {
@@ -275,6 +281,13 @@ namespace CompanyManagementWeb.Controllers
         {
             if (ModelState.IsValid)
             {
+                if (scheduleViewModel.EndTime.Value < scheduleViewModel.StartTime.Value)
+                {
+                    ModelState.AddModelError("DateError", "Thời gian kết thúc phải sau thời gian bắt đầu");
+                    scheduleViewModel.Departments = new SelectList(_context.Departments.Where(d => d.CompanyId == GetCompanyId()), "Id", "Name");
+                    return View(scheduleViewModel);
+                }
+
                 try
                 {
                     var schedule = await _context.Schedules.FindAsync(scheduleViewModel.Id);
@@ -366,6 +379,11 @@ namespace CompanyManagementWeb.Controllers
         private int GetCompanyId()
         {
             return HttpContext.Session.GetInt32(SessionVariable.CompanyId).Value;
+        }
+
+        private int GetUserId()
+        {
+            return HttpContext.Session.GetInt32(SessionVariable.UserId).Value;
         }
     }
 }

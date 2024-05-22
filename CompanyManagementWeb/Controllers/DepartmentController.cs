@@ -98,6 +98,24 @@ namespace CompanyManagementWeb.Controllers
             var department = await _context.Departments.FindAsync(id);
             if (department != null)
             {
+                var posts = _context.Posts.Where(d => d.DepartmentId == department.Id);
+                foreach (var item in posts)
+                {
+                    item.DepartmentId = null;
+                }
+
+                var schedules = _context.Schedules.Where(d => d.DepartmentId == department.Id);
+                foreach (var item in schedules)
+                {
+                    item.DepartmentId = null;
+                }
+
+                var userCompanies = _context.UserCompanies.Where(d => d.DepartmentId == department.Id);
+                foreach (var item in userCompanies)
+                {
+                    item.DepartmentId = null;
+                }
+
                 _context.Departments.Remove(department);
             }
 

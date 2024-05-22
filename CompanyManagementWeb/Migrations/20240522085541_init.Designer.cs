@@ -12,8 +12,8 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace CompanyManagementWeb.Migrations
 {
     [DbContext(typeof(CompanyManagementDbContext))]
-    [Migration("20240519135201_update-4")]
-    partial class update4
+    [Migration("20240522085541_init")]
+    partial class init
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -95,6 +95,9 @@ namespace CompanyManagementWeb.Migrations
 
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
 
+                    b.Property<int>("CompanyId")
+                        .HasColumnType("int");
+
                     b.Property<string>("Content")
                         .HasColumnType("nvarchar(max)");
 
@@ -110,13 +113,15 @@ namespace CompanyManagementWeb.Migrations
                     b.Property<int>("EmployeeId")
                         .HasColumnType("int");
 
-                    b.Property<int>("PostCategoryId")
+                    b.Property<int?>("PostCategoryId")
                         .HasColumnType("int");
 
                     b.Property<string>("Title")
                         .HasColumnType("nvarchar(max)");
 
                     b.HasKey("Id");
+
+                    b.HasIndex("CompanyId");
 
                     b.HasIndex("DepartmentId");
 
@@ -175,6 +180,9 @@ namespace CompanyManagementWeb.Migrations
                     b.Property<int>("CompanyId")
                         .HasColumnType("int");
 
+                    b.Property<bool>("IsAdmin")
+                        .HasColumnType("bit");
+
                     b.Property<string>("Name")
                         .HasColumnType("nvarchar(max)");
 
@@ -223,6 +231,9 @@ namespace CompanyManagementWeb.Migrations
 
                     b.Property<int>("CompanyId")
                         .HasColumnType("int");
+
+                    b.Property<string>("Content")
+                        .HasColumnType("nvarchar(max)");
 
                     b.Property<int?>("DepartmentId")
                         .HasColumnType("int");
@@ -327,6 +338,12 @@ namespace CompanyManagementWeb.Migrations
 
             modelBuilder.Entity("CompanyManagementWeb.Models.Post", b =>
                 {
+                    b.HasOne("CompanyManagementWeb.Models.Company", "Company")
+                        .WithMany()
+                        .HasForeignKey("CompanyId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
                     b.HasOne("CompanyManagementWeb.Models.Department", "Department")
                         .WithMany()
                         .HasForeignKey("DepartmentId");
@@ -339,9 +356,9 @@ namespace CompanyManagementWeb.Migrations
 
                     b.HasOne("CompanyManagementWeb.Models.PostCategory", "PostCategory")
                         .WithMany()
-                        .HasForeignKey("PostCategoryId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
+                        .HasForeignKey("PostCategoryId");
+
+                    b.Navigation("Company");
 
                     b.Navigation("Department");
 
