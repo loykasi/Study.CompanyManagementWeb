@@ -28,106 +28,70 @@ namespace CompanyManagementWeb.Controllers
         {
             int companyId = HttpContext.Session.GetInt32("companyId").Value;
             var PostCategories = _context.PostCategories.Where(d => d.CompanyId == companyId);
-            return View(await PostCategories.ToListAsync());
-        }
-
-        // GET: PostCategorie/Details/5
-        [JwtAuthorizationFilter(resource: ResourceEnum.PostCategory, permission: PermissionEnum.Edit)]
-        public async Task<IActionResult> Details(int? id)
-        {
-            if (id == null)
+            PostCategoryViewModel postCategoryViewModel = new()
             {
-                return NotFound();
-            }
-
-            var postCategory = await _context.PostCategories
-                .FirstOrDefaultAsync(m => m.Id == id);
-            if (postCategory == null)
-            {
-                return NotFound();
-            }
-
-            return View(postCategory);
-        }
-
-        // GET: PostCategorie/Create
-        [JwtAuthorizationFilter(resource: ResourceEnum.PostCategory, permission: PermissionEnum.Edit)]
-        public IActionResult Create()
-        {
-            return View();
+                PostCategories = await PostCategories.ToListAsync()
+            };
+            return View(postCategoryViewModel);
         }
 
         // POST: PostCategorie/Create
         [HttpPost]
         [ValidateAntiForgeryToken]
         [JwtAuthorizationFilter(resource: ResourceEnum.PostCategory, permission: PermissionEnum.Edit)]
-        public async Task<IActionResult> Create(PostCategoryCreateViewModel postCategoryCreateViewModel)
+        public async Task<IActionResult> Create(PostCategoryViewModel postCategoryViewModel)
         {
             if (ModelState.IsValid)
             {
                 PostCategory postCategory = new()
                 {
-                    Name = postCategoryCreateViewModel.Name,
+                    Name = postCategoryViewModel.PostCategoryCreateViewModel.Name,
                     CompanyId = HttpContext.Session.GetInt32("companyId").Value
                 };
                 _context.Add(postCategory);
                 await _context.SaveChangesAsync();
-                return RedirectToAction(nameof(Index));
-            }
-            return View(postCategoryCreateViewModel);
-        }
 
-        // GET: PostCategorie/Edit/5
-        [JwtAuthorizationFilter(resource: ResourceEnum.PostCategory, permission: PermissionEnum.Edit)]
-        public async Task<IActionResult> Edit(int? id)
-        {
-            if (id == null)
-            {
-                return NotFound();
+                int companyId = HttpContext.Session.GetInt32("companyId").Value;
+                var PostCategories = _context.PostCategories.Where(d => d.CompanyId == companyId);
+                postCategoryViewModel.PostCategories = await PostCategories.ToListAsync();
+                return PartialView("PostCategoryListPartial", postCategoryViewModel);
             }
-
-            var postCategory = await _context.PostCategories.FindAsync(id);
-            if (postCategory == null)
-            {
-                return NotFound();
-            }
-            PostCategoryCreateViewModel postCategoryCreateViewModel = new()
-            {
-                Id = postCategory.Id,
-                Name = postCategory.Name,
-            };
-            return View(postCategoryCreateViewModel);
+            return NoContent();
         }
 
         // POST: PostCategorie/Edit/5
         [HttpPost]
         [ValidateAntiForgeryToken]
         [JwtAuthorizationFilter(resource: ResourceEnum.PostCategory, permission: PermissionEnum.Edit)]
-        public async Task<IActionResult> Edit(PostCategoryCreateViewModel postCategoryCreateViewModel)
+        public async Task<IActionResult> Edit(PostCategoryViewModel postCategoryViewModel)
         {
             if (ModelState.IsValid)
             {
                 try
                 {
-                    var postCategory = _context.PostCategories.FirstOrDefault(d => d.Id == postCategoryCreateViewModel.Id);
-                    postCategory.Name = postCategoryCreateViewModel.Name;
+                    var postCategory = _context.PostCategories.FirstOrDefault(d => d.Id == postCategoryViewModel.PostCategoryCreateViewModel.Id);
+                    postCategory.Name = postCategoryViewModel.PostCategoryCreateViewModel.Name;
                     _context.Update(postCategory);
                     await _context.SaveChangesAsync();
                 }
                 catch (DbUpdateConcurrencyException)
                 {
-                    if (!PostCategoryExists(postCategoryCreateViewModel.Id))
+                    if (!PostCategoryExists(postCategoryViewModel.PostCategoryCreateViewModel.Id))
                     {
-                        return NotFound();
+                        return NoContent();
                     }
                     else
                     {
                         throw;
                     }
                 }
-                return RedirectToAction(nameof(Index));
+                
+                int companyId = HttpContext.Session.GetInt32("companyId").Value;
+                var PostCategories = _context.PostCategories.Where(d => d.CompanyId == companyId);
+                postCategoryViewModel.PostCategories = await PostCategories.ToListAsync();
+                return PartialView("PostCategoryListPartial", postCategoryViewModel);
             }
-            return View(postCategoryCreateViewModel);
+            return NoContent();
         }
 
         // POST: PostCategorie/Delete/5
@@ -145,7 +109,11 @@ namespace CompanyManagementWeb.Controllers
 
             int companyId = HttpContext.Session.GetInt32("companyId").Value;
             var PostCategories = _context.PostCategories.Where(d => d.CompanyId == companyId);
-            return PartialView("PostCategoryListPartial", await PostCategories.ToListAsync());
+            PostCategoryViewModel postCategoryViewModel = new()
+            {
+                PostCategories = await PostCategories.ToListAsync()
+            };
+            return PartialView("PostCategoryListPartial", postCategoryViewModel);
         }
 
         private bool PostCategoryExists(int id)

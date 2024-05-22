@@ -1,4 +1,5 @@
-﻿@model IEnumerable<CompanyManagementWeb.Models.Department>
+﻿@* @model IEnumerable<CompanyManagementWeb.Models.Department> *@
+@model CompanyManagementWeb.ViewModels.DepartmentViewModel
 @inject CompanyManagementWeb.Services.IUserService userService
 
 @{
@@ -9,7 +10,7 @@
     <h2 class="m-0 align-bottom">Phòng ban</h2>
     @if (await userService.IsInPermission("Department", "Edit"))
     {
-        <a class="m-0 align-bottom btn btn-secondary" asp-action="Create">Tạo phòng ban</a>
+        <a class="m-0 align-bottom btn btn-secondary" onclick="openCreateModal()">Tạo phòng ban</a>
     }
 </div>
 <table class="table">
@@ -45,8 +46,55 @@
   </div>
 </div>
 
+<!--Create Modal -->
+<div class="modal fade" id="createModal" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
+  <div class="modal-dialog">
+    <div class="modal-content">
+        <form id="createForm" asp-action="Create">
+        <div class="modal-body">
+            <div class="mb-3">
+                <label asp-for="DepartmentCreateViewModel.Name" class="col-form-label">Phòng ban:</label>
+                <input asp-for="DepartmentCreateViewModel.Name" class="form-control" />
+                <span asp-validation-for="DepartmentCreateViewModel.Name" class="text-danger"></span>
+            </div>
+        </div>
+        <div class="modal-footer">
+            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Đóng</button>
+            <button id="createBtn" type="submit" class="btn btn-primary">Thêm</button>
+        </div>
+        </form>
+    </div>
+  </div>
+</div>
+
+<!--Edit Modal -->
+<div class="modal fade" id="editModal" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
+  <div class="modal-dialog">
+    <div class="modal-content">
+        <form id="editForm" asp-action="Edit">
+        <div class="modal-body">
+            <input id="hiddenIdField" type="hidden" asp-for="DepartmentCreateViewModel.Id" />
+            <div class="mb-3">
+                <label asp-for="DepartmentCreateViewModel.Name" class="col-form-label">Phòng ban:</label>
+                <input id="editInputField" asp-for="DepartmentCreateViewModel.Name" class="form-control" />
+                <span asp-validation-for="DepartmentCreateViewModel.Name" class="text-danger"></span>
+            </div>
+        </div>
+        <div class="modal-footer">
+            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Đóng</button>
+            <button id="editBtn" type="submit" class="btn btn-primary">Lưu</button>
+        </div>
+        </form>
+    </div>
+  </div>
+</div>
+
 @section Scripts {
+    @{await Html.RenderPartialAsync("_ValidationScriptsPartial");}
     <script>
+        const hiddenidField = document.getElementById("hiddenIdField");
+        const editInputField = document.getElementById("editInputField");
+
         function deleteDepartment(id) {
             $.ajax({
                 type: 'POST',
@@ -69,5 +117,66 @@
             $('#deleteBtn').attr('onClick','deleteDepartment(' + id + ')');
             $('#deleteConfirmModal').modal('show');
         }
+
+        function openCreateModal() {
+            $('#createModal').modal('show');
+        }
+
+        function openEditModal(id, text) {
+            hiddenidField.value = id;
+            editInputField.value = text;
+
+            $('#editModal').modal('show');
+        }
+
+        $("#createForm").submit(function(e) {
+            e.preventDefault();
+            console.log("create");
+
+            var form = $(this);
+            var actionUrl = form.attr('action');
+
+            $.ajax({
+                type: 'POST',
+                url: actionUrl,
+                data: form.serialize(),
+                success: function (response) {
+                    if (response != null) {
+                        $('#content').html(response);
+                        $('#createModal').modal('hide');
+                    } else {
+                        console.log('invalid');
+                    }
+                },
+                error: function (response, status, error) {
+                    console.log(status);
+                },
+            });
+        });
+
+        $("#editForm").submit(function(e) {
+            e.preventDefault();
+            console.log("create");
+
+            var form = $(this);
+            var actionUrl = form.attr('action');
+
+            $.ajax({
+                type: 'POST',
+                url: actionUrl,
+                data: form.serialize(),
+                success: function (response) {
+                    if (response != null) {
+                        $('#content').html(response);
+                        $('#editModal').modal('hide');
+                    } else {
+                        console.log('invalid');
+                    }
+                },
+                error: function (response, status, error) {
+                    console.log(status);
+                },
+            });
+        });
     </script>
 }
