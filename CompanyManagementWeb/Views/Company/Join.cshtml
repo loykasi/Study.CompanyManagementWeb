@@ -1,3 +1,5 @@
+@model CompanyManagementWeb.ViewModels.CompanyJoinViewModel
+
 @{
     ViewData["Title"] = "Vào công ty";
 }
@@ -9,8 +11,9 @@
         <form asp-action="Join">
             <div asp-validation-summary="ModelOnly" class="text-danger"></div>
             <div class="form-group mb-2">
-                <label for="code" class="control-label my-2">Mã mời</label>
-                <input name="code" class="form-control" />
+                <label asp-for="Code" class="control-label my-2">Mã mời</label>
+                <input asp-for="Code" class="form-control" />
+                <span asp-validation-for="Code" class="text-danger"></span>
             </div>
             <div class="form-group">
                 <input type="submit" value="Tham gia" class="btn btn-primary" />

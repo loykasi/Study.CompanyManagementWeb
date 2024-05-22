@@ -4,6 +4,7 @@ using CompanyManagementWeb.ViewModels;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using CompanyManagementWeb.Services;
+using Microsoft.EntityFrameworkCore;
 
 namespace CompanyManagementWeb.Controllers
 {
@@ -57,6 +58,7 @@ namespace CompanyManagementWeb.Controllers
                 SetJWTCookie(token.AccessToken!);
                 SetRefreshTokenCookie(user, token.RefreshToken!);
                 HttpContext.Session.SetInt32("userId", user.Id);
+                HttpContext.Session.SetString("userName", user.Name);
             
                 var userCompany = _context.UserCompanies.FirstOrDefault(u => u.UserId == user.Id);
                 if (userCompany != null)
@@ -103,9 +105,13 @@ namespace CompanyManagementWeb.Controllers
             SetRefreshTokenCookie(user, token.RefreshToken!);
 
             HttpContext.Session.SetInt32("userId", user.Id);
-            var userCompany = _context.UserCompanies.FirstOrDefault(u => u.UserId == user.Id);
+            HttpContext.Session.SetString("userName", user.Name);
+            var userCompany = _context.UserCompanies.Include(u => u.Company).FirstOrDefault(u => u.UserId == user.Id);
             if (userCompany != null)
+            {
                 HttpContext.Session.SetInt32("companyId", userCompany.CompanyId);
+                HttpContext.Session.SetString("companyName", userCompany.Company.Name);
+            }
 
             return RedirectToAction(nameof(Index), "Home");
         }
@@ -114,13 +120,13 @@ namespace CompanyManagementWeb.Controllers
         {
             Response.Cookies.Delete("jwtCookie");
             Response.Cookies.Delete("refreshTokenCookie");
-            HttpContext.Session.Clear();
             var user = _context.Users.FirstOrDefault(u => u.Id == HttpContext.Session.GetInt32("userId"));
             if (user != null)
             {
                 user.RefreshToken = null;
                 _context.SaveChanges();
             }
+            HttpContext.Session.Clear();
             return RedirectToAction("Index", "Home");
         }
  

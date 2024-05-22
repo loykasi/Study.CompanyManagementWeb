@@ -87,7 +87,15 @@
                     <ul class="navbar-nav ms-auto">
                         @if (Context.Session.GetInt32(CompanyManagementWeb.Data.SessionVariable.UserId) != null)
                         {
-                            <span class="navbar-text">Hello User!</span>
+                            <span class="navbar-text">@Context.Session.GetString(CompanyManagementWeb.Data.SessionVariable.UserName)</span>
+                            @if (Context.Session.GetString(CompanyManagementWeb.Data.SessionVariable.CompanyName) != null)
+                            {
+                            <li class="nav-item">
+                                <a class="nav-link text-dark" asp-area="" asp-controller="Company" asp-action="Information">
+                                    @Context.Session.GetString(CompanyManagementWeb.Data.SessionVariable.CompanyName)
+                                </a>
+                            </li>
+                            }
                             <li class="nav-item">
                                 <a class="nav-link text-dark" asp-area="" asp-controller="Identity" asp-action="Logout">Log out</a>
                             </li>

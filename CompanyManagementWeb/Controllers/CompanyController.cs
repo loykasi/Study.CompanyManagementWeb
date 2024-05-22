@@ -23,7 +23,7 @@ namespace CompanyManagementWeb.Controllers
         }
 
         [HttpPost]
-        public IActionResult Create(CompanyCreateViewModel companyCreateViewModel)
+        public async Task<IActionResult> Create(CompanyCreateViewModel companyCreateViewModel)
         {
             if (!ModelState.IsValid)
             {
@@ -38,18 +38,29 @@ namespace CompanyManagementWeb.Controllers
                 CreatedDate = DateTime.Now,
             };
             _context.Add(company);
-            _context.SaveChanges();
+            await _context.SaveChangesAsync();
+
+            Role role = new()
+            {
+                Name = "Admin",
+                CompanyId = company.Id,
+                IsAdmin = true
+            };
+            _context.Add(role);
+            await _context.SaveChangesAsync();
 
             UserCompany userCompany = new()
             {
                 UserId = userId,
-                CompanyId = company.Id
+                CompanyId = company.Id,
+                RoleId = role.Id
             };
             company.Code = GenerateCompanyCode(company.Id);
             _context.Add(userCompany);
-            _context.SaveChanges();
+            await _context.SaveChangesAsync();
 
             HttpContext.Session.SetInt32("companyId", company.Id);
+            HttpContext.Session.SetString("companyName", company.Name);
 
             return RedirectToAction("Index", "Home");
         }
@@ -60,11 +71,11 @@ namespace CompanyManagementWeb.Controllers
         }
 
         [HttpPost]
-        public IActionResult Join(string code)
+        public async Task<IActionResult> Join(CompanyJoinViewModel companyJoinViewModel)
         {
-            _logger.LogInformation("Company code: {code}", code);
+            _logger.LogInformation("Company code: {code}", companyJoinViewModel.Code);
             
-            var company = _context.Companies.FirstOrDefault(c => c.Code == code);
+            var company = _context.Companies.FirstOrDefault(c => c.Code == companyJoinViewModel.Code);
             if (company == null)
             {
                 return View();
@@ -75,18 +86,39 @@ namespace CompanyManagementWeb.Controllers
                 UserId = HttpContext.Session.GetInt32(SessionVariable.UserId).Value,
                 CompanyId = company.Id
             };
+            _context.Add(userCompany);
 
             var companyContext = _context.UserCompanies.FirstOrDefault(u => u.UserId == userCompany.UserId);
             if (companyContext != null)
             {
                 _context.Remove(companyContext);
             }
-            _context.Add(userCompany);
-            _context.SaveChanges();
+            
+            await _context.SaveChangesAsync();
 
             HttpContext.Session.SetInt32("companyId", company.Id);
+            HttpContext.Session.SetString("companyName", company.Name);
 
             return RedirectToAction("Index", "Home");
+        }
+
+        public async Task<IActionResult> Information()
+        {
+            var companyId = HttpContext.Session.GetInt32("companyId");
+            if (companyId == null)
+            {
+                return RedirectToAction("Index", "Home");
+            }
+
+            var company = await _context.Companies.FindAsync(companyId);
+
+            CompanyViewModel companyViewModel = new()
+            {
+                Name = company.Name,
+                Address = company.Address,
+                InviteCode = company.Code
+            };
+            return View(companyViewModel);
         }
 
         private string GenerateCompanyCode(int id)

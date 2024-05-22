@@ -51,7 +51,7 @@
             @* <a onclick="deleteUser(@Model.CompanyUsers[i].Id)" class="btn btn-danger">Delete</a> *@
             @if (await userService.IsInPermission("Member", "Edit"))
             {
-                <a onclick="openConfirm(@Model.CompanyUsers[i].Id, '@Model.CompanyUsers[i].Name')" class="btn btn-danger">Delete</a>
+                <a onclick="openConfirm(@Model.CompanyUsers[i].Id, '@Model.CompanyUsers[i].Name')" class="btn btn-danger">Xóa</a>
             }
         </td>
     </tr>

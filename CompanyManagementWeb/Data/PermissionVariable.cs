@@ -24,7 +24,7 @@ namespace CompanyManagementWeb.Data
         {
             return permission switch
             {
-                "None" => "None",
+                "None" => "Không có quyền",
                 "Edit" => "Chỉnh sửa",
                 "View" => "Xem",
                 _ => string.Empty,

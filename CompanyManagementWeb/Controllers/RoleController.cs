@@ -207,13 +207,29 @@ namespace CompanyManagementWeb.Controllers
                     role.IsAdmin = roleCreateViewModel.IsAdmin;
                     await _context.SaveChangesAsync();
 
-                    var rolePermissions = _context.RolePermissions.Where(r => r.RoleId == roleCreateViewModel.Id);
-                    foreach (var item in roleCreateViewModel.RoleDetails)
+                    if (_context.RolePermissions.Any(r => r.RoleId == roleCreateViewModel.Id))
                     {
-                        var detail = rolePermissions.FirstOrDefault(r => r.ResourceId == item.ResourceId);
-                        detail.PermissionId = item.PermissionId;
+                        var rolePermissions = _context.RolePermissions.Where(r => r.RoleId == roleCreateViewModel.Id);
+                        foreach (var item in roleCreateViewModel.RoleDetails)
+                        {
+                            var detail = rolePermissions.FirstOrDefault(r => r.ResourceId == item.ResourceId);
+                            detail.PermissionId = item.PermissionId;
+                        }
                     }
-
+                    else
+                    {
+                        foreach (var item in roleCreateViewModel.RoleDetails)
+                        {
+                            RolePermission rolePermission = new()
+                            {
+                                RoleId = roleCreateViewModel.Id.Value,
+                                ResourceId = item.ResourceId,
+                                PermissionId = item.PermissionId
+                            };
+                            _context.Add(rolePermission);
+                        }
+                    }
+                    
                     await _context.SaveChangesAsync();
                 }
                 catch (DbUpdateConcurrencyException)

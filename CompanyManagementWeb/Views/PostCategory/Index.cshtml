@@ -52,7 +52,7 @@
         <form id="createForm" asp-action="Create">
         <div class="modal-body">
             <div class="mb-3">
-                <label asp-for="PostCategoryCreateViewModel.Name" class="col-form-label">Phòng ban:</label>
+                <label asp-for="PostCategoryCreateViewModel.Name" class="col-form-label">Danh mục:</label>
                 <input asp-for="PostCategoryCreateViewModel.Name" class="form-control" />
                 <span asp-validation-for="PostCategoryCreateViewModel.Name" class="text-danger"></span>
             </div>
@@ -74,7 +74,7 @@
         <div class="modal-body">
             <input id="hiddenIdField" type="hidden" asp-for="PostCategoryCreateViewModel.Id" />
             <div class="mb-3">
-                <label asp-for="PostCategoryCreateViewModel.Name" class="col-form-label">Phòng ban:</label>
+                <label asp-for="PostCategoryCreateViewModel.Name" class="col-form-label">Danh mục:</label>
                 <input id="editInputField" asp-for="PostCategoryCreateViewModel.Name" class="form-control" />
                 <span asp-validation-for="PostCategoryCreateViewModel.Name" class="text-danger"></span>
             </div>
@@ -89,6 +89,7 @@
 </div>
 
 @section Scripts {
+    @{await Html.RenderPartialAsync("_ValidationScriptsPartial");}
     <script>
         const hiddenidField = document.getElementById("hiddenIdField");
         const editInputField = document.getElementById("editInputField");
