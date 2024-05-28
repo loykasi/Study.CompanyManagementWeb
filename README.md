@@ -1,5 +1,9 @@
 # Company management website ASP.NET Core 8 MVC
 
+- Sinh viên thực hiện: Hoàng Chung Nghĩa
+- Mã sinh viên: 21115053120129
+- Lớp học phàn: 223LTC04
+
 ---
 Tiếng Việt
 ## Yêu cầu
