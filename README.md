@@ -5,6 +5,7 @@
 - Lớp học phàn: 223LTC04
 
 ---
+
 Tiếng Việt
 ## Yêu cầu
 - [Visual Studio 2022](https://visualstudio.microsoft.com/vs/)
@@ -21,6 +22,7 @@ update-database
 ```
 
 ---
+
 English
 ## Requirements
 - [Visual Studio 2022](https://visualstudio.microsoft.com/vs/)
@@ -35,3 +37,7 @@ English
 ```
 update-database
 ```
+---
+
+Preview video
+[![Login Screen](Preview/preview.png?raw=true)](https://www.youtube.com/watch?v=vXZK-UjzJzs)
