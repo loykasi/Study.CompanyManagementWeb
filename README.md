@@ -40,4 +40,4 @@ update-database
 ---
 
 Preview video
-[![Login Screen](Preview/preview.png?raw=true)](https://www.youtube.com/watch?v=vXZK-UjzJzs)
+[![Preview](Preview/preview.png?raw=true)](https://www.youtube.com/watch?v=vXZK-UjzJzs)
